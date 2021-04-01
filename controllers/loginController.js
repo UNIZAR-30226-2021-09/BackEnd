@@ -1,17 +1,50 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const SECRET_KEY= 'asdf';
+const User = require('./auth.dao');
+const jwt=require('jsonwebtoken');
+const bcrypt=require('bcryptjs');
+const SECRET_KEY='secretkey123456';
 
-exports.createUser = (req, res, next) => {
-    const newUser = {
+exports.createUser=(req,res,next)=>{
+    const newUser={
         name: req.body.name,
-        mail: req.body.mail,
-        passwd: req.body.passwd,
-        rep_passwd: req.body.rep_passwd,
+        email: req.body.email,
+        password: req.body.password,
     }
 
-    newUser.create(newUser, (err, user) => {
-        if (err) return res.status(500).send('Error en el servidor');
-        const 
+    User.create(newUser,(err,user)=>{
+        if(err) return res.status(500).send('Server error');
+        const expiresIn = 24*60*60;
+        const accessToken= jwt.sign({id: user.id},
+            SECRET_KEY,{
+                expiresIn:expiresIn
+            });
+        //Response
+        res.send({user});
+    });
+}
+
+exports.loginUser=(req,res,next)=>{
+    const userData={
+        email: req.body.email,
+        password: req.body.password
+    }
+    User.findOne({email: userData.email}, (err,user)=>{
+        if(err) return res.status(500).send('Server error!');
+        
+        if(!user){
+            // email doesn't exist
+            res.status(409).send({message: 'Semething is wrong'});
+        } else{
+            const resultPassword = userData.password;
+            if(resultPassword){
+                const expiresIn= 24*60*60;
+                const accessToken = jwt.sign({id: user.id}, SECRET_KEY,{expiresIn: expiresIn})
+                ;
+                res.send({userData});
+            }else{
+                // password wrong
+                res.status(409).send({message: 'Semething is wrong'});
+            }
+        }
+
     })
 }
