@@ -16,6 +16,9 @@ const partidaSchema = new Schema ({
     estado:{
         type: String
     },
+    tipo:{
+        type: String
+    },
     barcos:[{
         propietario: {
             type: Schema.Types.ObjectId, 
