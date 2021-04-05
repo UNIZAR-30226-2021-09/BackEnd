@@ -31,20 +31,21 @@ exports.createUser=(req,res,next)=>{
 
 exports.loginUser=(req,res,next)=>{
     const userData={
-        email: req.body.email,
+        nombreUsuario: req.body.nombreUsuario,
         contrasena: req.body.contrasena
     }
-    User.findOne({email: userData.email}, (err,user)=>{
+    User.findOne({nombreUsuario: userData.nombreUsuario}, (err,user)=>{
         if(err) return res.status(500).send('Server error!');
         
         if(!user){
-            // email doesn't exist
+            // No existe el email
             res.status(409).send({message: 'Semething is wrong'});
         } else{
+            //correcto
             const resultPassword =bcrypt.compareSync( userData.contrasena, user.contrasena);
             if(resultPassword){
                 const expiresIn= 24*60*60;
-                const accessToken = jwt.sign({id: user.id}, SECRET_KEY,{expiresIn: expiresIn});
+                const accessToken = jwt.sign({nombreUsuario: user.nombreUsuario}, SECRET_KEY,{expiresIn: expiresIn});
                 const dataUser ={
                     nombreUsuario: user.nombreUsuario,
                     email: user.email,
@@ -60,3 +61,22 @@ exports.loginUser=(req,res,next)=>{
 
     })
 }
+/*
+exports.addFriend=(req,res,next)=>{
+    const petitionData={
+        nombreUsuario: req.body.nombreUsuario,
+        nombreAmigo: req.body.nombreAmigo,
+        accessToken: req.body.accessToken
+    }
+
+    User.findOne({nombreUsuario: petitionData.nombreUsuario}, (err,user)=>{
+        if(err) return res.status(500).send('Server error!');
+        
+        if(!user){
+            // usuario doesn't exist
+            res.status(409).send({message: `usuario ${petitionData.nombreUsuario} no encontrado` });
+        } else{
+        }
+    }
+
+}*/
