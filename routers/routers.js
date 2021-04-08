@@ -1,6 +1,8 @@
 const Users = require('../controllers/Controller');
 module.exports=(router) =>{
-    router.post('/user/signin',Users.createUser );
-    router.get('/user/login',Users.loginUser );
-    router.get('/user/addfriend',Users.loginUser );
+    router.use('/user',Users.autentificar);
+    router.post('/user/addfriend',Users.addFriend );
+    router.post('/signin',Users.createUser );
+    router.get('/login',Users.loginUser );
 }
+
