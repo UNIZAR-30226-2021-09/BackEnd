@@ -46,8 +46,7 @@ const userSchema = new Schema ({
         },
     },
     amigos:[{
-        type: Schema.Types.ObjectId, 
-        ref: 'Usuario'
+        type: String
     }],
     //Diseño fisico: para acceder más rápido a la lista de partidas
     partidas:[{
