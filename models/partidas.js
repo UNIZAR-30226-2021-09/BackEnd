@@ -3,20 +3,21 @@ const Schema = mongoose.Schema;
 mongoose.set('useCreateIndex',true);
 const partidaSchema = new Schema ({
     participante1: {
-        type: Schema.Types.ObjectId, 
+        type: String, 
         ref: 'Usuario'
     },
     participante2: {
-        type: Schema.Types.ObjectId, 
+        type: String, 
         ref: 'Usuario'
     },
     ganador: {
-        type: Number
+        type: String,
+        ref: 'Usuario'
     },
-    estado:{
+    estado:{//VALORES:"pendiente","enCurso","finalizada"
         type: String
     },
-    tipo:{
+    tipo:{//VALORES:"ciegas","amistoso","ia","torneo"
         type: String
     },
     barcos:[{

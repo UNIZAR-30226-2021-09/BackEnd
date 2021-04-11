@@ -1,10 +1,14 @@
 const User = require('../dataAccess/DataAccess');
 const mongoose = require('mongoose');
+
 const requestSchema = require('../models/peticiones');
 const Request = mongoose.model('Requests',requestSchema);
+
+const partidaSchema = require('../models/partidas');
+const Partida = mongoose.model('Partidas',partidaSchema);
+
 const jwt=require('jsonwebtoken');
 const bcrypt=require('bcryptjs');
-const { get } = require('../models/usuario');
 const SECRET_KEY='secretkey123456';
 
 
@@ -25,11 +29,9 @@ exports.autentificar=(req, res, next) => {
     } else {
       return res.send({ 
           mensaje: 'Token no proveído.' 
-      });
+      }); 
     }
- };
-
-
+}
 
 exports.loginUser= (req, res) => {
     const userData={
@@ -64,6 +66,40 @@ exports.loginUser= (req, res) => {
                 Request.find({solicitado: user.nombreUsuario},(err,result)=>{
                     if (err) return res.status(500).send('Server error!');
                     iReq =new Object(result.map(a => a.solicitante));
+
+                //Obtener el historial del usuario
+                Partida.find(
+                    {$and:[
+                        {estado:"finalizada"},
+                        {$or:[
+                            {participante1: user.nombreUsuario},
+                            {participante2: user.nombreUsuario}
+                        ]}
+                    ]},
+                    null,
+                    { sort: { 'date': 'desc' }, limit: 10 },
+                    (err,result)=>{
+                    if (err) return res.status(500).send('Server error!');
+                    historial = result.map(function(item){
+                        if(user.nombreUsuario==item.ganador )
+                        {
+                            resultado="victoria";
+                        }else{
+                            resultado="derrota";
+                        }
+                        if(user.nombreUsuario==item.participante1){
+                            contrincante=item.participante2;
+                        }else{
+                            contrincante=item.participante1;
+                        }
+
+                        return {
+                            contrincante: contrincante,
+                            resultado: resultado,
+                            id: item._id
+                        };
+                    });
+                    
                 //devolvemos los datos del usuario
                 const dataUser ={
                     nombreUsuario: user.nombreUsuario,
@@ -72,11 +108,14 @@ exports.loginUser= (req, res) => {
                     solicitudesEntrantes: iReq,
                     solicitudesSalientes: oReq,
                     accessToken: accessToken,
-                    expiresIn: expiresIn,
-                    
+                    puntos:user.puntos,
+                    partidasGanadas:user.partidasGanadas,
+                    partidasPerdidas:user.partidasPerdidas,
+                    torneosGanados:user.torneosGanados,
+                    historial:historial
                 }
-                res.send({dataUser});
-                });});
+                res.send(dataUser);
+                });});});
             }else{
                 // contraseña equivocada
                 return res.status(409).send({message: 'Something is wrong'});
@@ -86,15 +125,13 @@ exports.loginUser= (req, res) => {
     })
 }
 
-
-
 exports.register=(req,res)=>{
     const newUser={
         nombreUsuario: req.body.nombreUsuario,
         email: req.body.email,
         contrasena: bcrypt.hashSync(req.body.contrasena)
     }
-
+    if(newUser.nombreUsuario=="I.A") return res.status(409).send('Nombre reservado');
     User.create(newUser,(err,user)=>{//añadimos al usuario a la base de datos
         if(err && err.code==11000) return res.status(409).send('Email or user already exist');
         if(err) return res.status(500).send('Server error');
@@ -120,9 +157,6 @@ exports.register=(req,res)=>{
     });
 }
 
-
-
-
 exports.addFriend=(req,res)=>{
     const request= new Request ({
         solicitante: req.body.nombreUsuario,
@@ -144,9 +178,6 @@ exports.addFriend=(req,res)=>{
 
 }
 
-
-
-
 exports.friendList=(req,res)=>{
     //Busca al usuario en la base de datos
     User.findOne({nombreUsuario: req.body.nombreUsuario}, (err,user)=>{
@@ -162,7 +193,24 @@ exports.friendList=(req,res)=>{
     })
 }
 
-exports.accept=(req,res)=>{
+exports.friendIncomingRequests=(req,res)=>{
+    Request.find({solicitado: req.body.nombreUsuario},(err,result)=>{
+        if (err) return res.status(500).send('Server error!');
+        iReq =new Object(result.map(a => a.solicitante));
+        return res.send(iReq);
+    });
+
+}
+
+exports.friendOutgoingRequests=(req,res)=>{
+    Request.find({solicitante: req.body.nombreUsuario},(err,result)=>{
+        if (err) return res.status(500).send('Server error!');
+        oReq =new Object(result.map(a => a.solicitado));
+        return res.send(oReq);
+    });
+}
+
+exports.userAccept=(req,res)=>{
     const petitionData={
         nombreUsuario: req.body.nombreUsuario,
         nombreAmigo: req.body.nombreAmigo,
@@ -211,7 +259,7 @@ exports.accept=(req,res)=>{
     });
 }
 
-exports.dismiss=(req,res)=>{
+exports.userDismiss=(req,res)=>{
     const petitionData={
         nombreUsuario: req.body.nombreUsuario,
         nombreAmigo: req.body.nombreAmigo,
@@ -232,4 +280,193 @@ exports.dismiss=(req,res)=>{
             });    
         }
     )
+}
+
+exports.crearPartida=(req,res)=>{
+    const partida= new Partida ({
+        participante1: req.body.participante1,
+        participante2: req.body.participante2,
+        ganador: req.body.ganador,
+        estado: "finalizada",
+        tipo: "amistoso"
+    });
+    if (req.body.participante1==req.body.participante2){
+        return res.status(500).send('No puedes enviar una solicitud de amistad a ti mismo');
+    }
+    //Añadimos la partida a la base de datos
+    partida.save(function (err) {
+        if (err) return res.status(500).send('Error en la petición');
+        //devolvemos la lista de solicitudes pendientes
+        return res.send(partida);
+    });
+}
+
+exports.gameIA=(req,res)=>{
+    const partida= new Partida ({
+        participante1: req.body.nombreUsuario,
+        participante2: "I.A",
+        ganador: undefined,
+        estado: "enCurso",
+        tipo: "ia"
+    });
+    //Añadimos la partida a la base de datos
+    partida.save(function (err) {
+        if (err) return res.status(500).send('Error en la petición');
+        //devolvemos la lista de solicitudes pendientes
+        return res.send(partida);
+    });
+}
+
+exports.gameFriend=(req,res)=>{
+    //comprobamos que el usuario a retar está en tu lista de amigos
+    User.find(
+    {
+        nombreUsuario:req.body.nombreUsuario,
+        amigos:req.body.nombreAmigo
+    },
+    (err,result)=>{
+    if (err) return res.status(500).send('Server Error');
+    if(!result){
+        return res.status(500).send(
+        `El usuario ${req.body.nombreAmigo} no está en tu lista de amigos`)
+    }
+    const partida= new Partida ({
+        participante1: req.body.nombreUsuario,
+        participante2: req.body.nombreAmigo,
+        ganador: undefined,
+        estado: "pendiente",
+        tipo: "amistoso"
+    });
+    //Añadimos la partida a la base de datos
+    partida.save(function (err) {
+        if (err) return res.status(500).send('Error en la petición');
+        //devolvemos la lista de solicitudes pendientes
+        return res.send(partida);
+    });});
+}
+
+exports.gameIncomingRequests=(req,res)=>{
+    //Partidas pendientes de aceptar
+    Partida.find(
+        {estado:"pendiente",
+        participante2: req.body.nombreUsuario},
+        (err,result)=>{
+        if (err) return res.status(500).send('Server error!');
+        peticiones = result.map(function(item){
+            return {
+                contrincante: item.participante1,
+                id: item._id
+            };
+        });
+        return res.send(peticiones);
+        });
+}
+
+exports.gameOutgoingRequests=(req,res)=>{
+    //Partidas pendientes de aceptar
+    Partida.find(
+        {estado:"pendiente",
+        participante1: req.body.nombreUsuario},
+        (err,result)=>{
+        if (err) return res.status(500).send('Server error!');
+        peticiones = result.map(function(item){
+            return {
+                contrincante: item.participante2,
+                id: item._id
+            };
+        });
+        return res.send(peticiones);
+        });
+}
+
+exports.gameInProgress=(req,res)=>{
+    //Partidas pendientes de aceptar
+    Partida.find(
+        {$and:[
+            {estado:"enCurso"},
+            {$or:[
+                {participante1: req.body.nombreUsuario},
+                {participante2: req.body.nombreUsuario}
+            ]}
+        ]},
+        (err,result)=>{
+        if (err) return res.status(500).send('Server error!');
+        peticiones = result.map(function(item){
+            if(req.body.nombreUsuario==item.participante1){
+                contrincante=item.participante2;
+            }else{
+                contrincante=item.participante1;
+            }
+            return {
+                contrincante: contrincante,
+                tipo:item.tipo,
+                id: item._id
+            };
+        });
+        return res.send(peticiones);
+        });
+}
+
+exports.history=(req,res)=>{
+    Partida.find(
+        {$and:[
+            {estado:"finalizada"},
+            {$or:[
+                {participante1: req.body.nombreUsuario},
+                {participante2: req.body.nombreUsuario}
+            ]}
+        ]},
+        null,
+        { sort: { 'date': 'desc' }/*, limit: 10*/ },
+        (err,result)=>{
+        if (err) return res.status(500).send('Server error!');
+        historial = result.map(function(item){
+            if(req.body.nombreUsuario==item.ganador ){
+                resultado="victoria";
+            }else{
+                resultado="derrota";
+            }
+            if(req.body.nombreUsuario==item.participante1){
+                contrincante=item.participante2;
+            }else{
+                contrincante=item.participante1;
+            }
+            return {
+                contrincante: contrincante,
+                resultado: resultado,
+                id: item._id
+            };
+        });
+        return res.send(historial);
+        });
+}
+
+exports.gameAccept=(req,res)=>{
+    Partida.findByIdAndUpdate(
+    { 
+        _id: req.body.gameid,
+        participante2: req.body.nombreUsuario
+    },
+    {
+        estado:"enCurso"
+    },
+    {new: true},
+    (err,partida) =>{
+        if (err) return res.status(500).send('Server error!');
+        if(!partida) return res.status(500).send('Error en la petición');
+        return res.send(partida);
+    }
+    )
+}
+exports.gameDismiss=(req,res)=>{
+    Partida.findByIdAndDelete(
+    { 
+        _id: req.body.gameid,
+        participante2: req.body.nombreUsuario
+    },
+    (err,partida) =>{
+        if (err) return res.status(500).send('Server error!');
+        if(!partida) return res.status(500).send('Error en la petición');
+        return res.send("Petición rechazada correctamente");
+    });
 }
