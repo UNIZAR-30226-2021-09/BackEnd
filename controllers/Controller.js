@@ -39,11 +39,11 @@ exports.loginUser= (req, res) => {
         contrasena: req.body.contrasena
     }
     User.findOne({nombreUsuario: userData.nombreUsuario}, (err,user)=>{
-        if(err) return res.status(500).send('Server error!');
+        if(err) return res.status(500).send({ mensaje:'Server error!'});
         
         if(!user){
             // No existe el email
-            return res.status(409).send({message: 'Something is wrong'});
+            return res.status(409).send({mensaje: 'Something is wrong'});
         } else{
             //correcto
             resultPassword =bcrypt.compareSync( userData.contrasena, user.contrasena);
@@ -79,7 +79,7 @@ exports.loginUser= (req, res) => {
                     null,
                     { sort: { 'date': 'desc' }, limit: 10 },
                     (err,result)=>{
-                    if (err) return res.status(500).send('Server error!');
+                    if (err) return res.status(500).send({ mensaje:'Server error!'});
                     historial = result.map(function(item){
                         if(user.nombreUsuario==item.ganador )
                         {
@@ -118,7 +118,7 @@ exports.loginUser= (req, res) => {
                 });});});
             }else{
                 // contraseña equivocada
-                return res.status(409).send({message: 'Something is wrong'});
+                return res.status(409).send({mensaje: 'Something is wrong'});
             }
         }
  
@@ -131,10 +131,10 @@ exports.register=(req,res)=>{
         email: req.body.email,
         contrasena: bcrypt.hashSync(req.body.contrasena)
     }
-    if(newUser.nombreUsuario=="I.A") return res.status(409).send('Nombre reservado');
+    if(newUser.nombreUsuario=="I.A") return res.status(409).send({ mensaje:'Nombre reservado'});
     User.create(newUser,(err,user)=>{//añadimos al usuario a la base de datos
-        if(err && err.code==11000) return res.status(409).send('Email or user already exist');
-        if(err) return res.status(500).send('Server error');
+        if(err && err.code==11000) return res.status(409).send({ mensaje:'Email or user already exist'});
+        if(err) return res.status(500).send({ mensaje:'Server error'});
         const expiresIn = 24*60*60;
         //creamos un token de acceso
         const accessToken= jwt.sign(
@@ -153,7 +153,7 @@ exports.register=(req,res)=>{
                 expiresIn: expiresIn
             }
         //devolvemos los datos del usuario creado
-        return res.send({dataUser});
+        return res.send(dataUser);
     });
 }
 
@@ -163,14 +163,14 @@ exports.addFriend=(req,res)=>{
         solicitado: req.body.nombreAmigo,
     });
     if (request.solicitado==request.solicitante){
-        return res.status(500).send('No puedes enviar una solicitud de amistad a ti mismo');
+        return res.status(500).send({ mensaje:'No puedes enviar una solicitud de amistad a ti mismo'});
     }
     //Añadimos la petición en la base de datos
     request.save(function (err) {
-        if (err) return res.status(500).send('Error en la petición');
+        if (err) return res.status(500).send({ mensaje:'Error en la petición'});
         //devolvemos la lista de solicitudes pendientes
         Request.find({solicitante: req.body.nombreUsuario},(err,result)=>{
-            if (err) return res.status(500).send('Server error!');
+            if (err) return res.status(500).send({ mensaje:'Server error!'});
             oReq =new Object(result.map(a => a.solicitado));
             return res.send(oReq);
         });
@@ -181,11 +181,11 @@ exports.addFriend=(req,res)=>{
 exports.friendList=(req,res)=>{
     //Busca al usuario en la base de datos
     User.findOne({nombreUsuario: req.body.nombreUsuario}, (err,user)=>{
-        if(err) return res.status(500).send('Server error!');
+        if(err) return res.status(500).send({ mensaje:'Server error!'});
 
         if(!user){
             // usuario no existe
-            res.send({message: `usuario ${req.body.nombreUsuario} no encontrado` });
+            res.send({mensake: `usuario ${req.body.nombreUsuario} no encontrado` });
         } else{
             //devuelve la lista de amigos
             return res.send(user.amigos);
@@ -195,7 +195,7 @@ exports.friendList=(req,res)=>{
 
 exports.friendIncomingRequests=(req,res)=>{
     Request.find({solicitado: req.body.nombreUsuario},(err,result)=>{
-        if (err) return res.status(500).send('Server error!');
+        if (err) return res.status(500).send({ mensaje:'Server error!'});
         iReq =new Object(result.map(a => a.solicitante));
         return res.send(iReq);
     });
@@ -204,7 +204,7 @@ exports.friendIncomingRequests=(req,res)=>{
 
 exports.friendOutgoingRequests=(req,res)=>{
     Request.find({solicitante: req.body.nombreUsuario},(err,result)=>{
-        if (err) return res.status(500).send('Server error!');
+        if (err) return res.status(500).send({ mensaje:'Server error!'});
         oReq =new Object(result.map(a => a.solicitado));
         return res.send(oReq);
     });
@@ -221,8 +221,8 @@ exports.userAccept=(req,res)=>{
         solicitado: petitionData.nombreUsuario,
         solicitante: petitionData.nombreAmigo,
     },(err,result)=>{
-        if(err) return res.status(500).send({message: 'Server error!' });
-        if(!result) return res.send({message: 'petición erronea' });
+        if(err) return res.status(500).send({mensaje: 'Server error!' });
+        if(!result) return res.send({mensaje: 'petición erronea' });
     
     //actualizamos la lista de amigos de ambos usuarios
     User.findOneAndUpdate(
@@ -237,7 +237,7 @@ exports.userAccept=(req,res)=>{
             if(err) return res.status(500).send('Server error!');
             else if(!myuser){
                 // usuario no existe 
-                return res.status(500).send({message: 'petición erronea' });
+                return res.status(500).send({mensaje: 'petición erronea' });
             }
             User.findOneAndUpdate(
                 { 
@@ -250,7 +250,7 @@ exports.userAccept=(req,res)=>{
                     if(err) return res.status(500).send('Server error!');
                     else if(!userFriend){
                         // usuario no existe 
-                        return res.status(500).send({message: 'petición erronea' });
+                        return res.status(500).send({mensaje: 'petición erronea' });
                     }
                     
                     return res.send(myuser.amigos);
@@ -271,7 +271,7 @@ exports.userDismiss=(req,res)=>{
             solicitante: petitionData.nombreAmigo,
         },(err,result)=>{
             if(err) return res.status(500).send('Server error!');
-            if(!result) return res.status(500).send({message: 'petición erronea' });
+            if(!result) return res.status(500).send({mensaje: 'petición erronea' });
             //Devolvemos la nueva lista de peticiones entrantes
             Request.find({solicitado: req.body.nombreUsuario},(err,result)=>{
                 if (err) return res.status(500).send('Server error!');
