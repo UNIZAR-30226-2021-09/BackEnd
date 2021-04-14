@@ -470,3 +470,34 @@ exports.gameDismiss=(req,res)=>{
         return res.send("Petición rechazada correctamente");
     });
 }
+
+exports.blindMatch=(req,res)=>{
+    Partida.find(
+        {
+            estado: "pendiente",
+            tipo: "ciegas"
+        },
+        {
+            participante2: req.body.nombreUsuario,
+            estado: "enCurso"
+        },
+        null,
+        (err,partida)=>{
+        if (err) return res.status(500).send('Server error!');
+        if (!partida) {
+            const nuevaPartida= new Partida ({
+                participante1: req.body.participante1,                    
+                estado: "pendiente",
+                tipo: "ciegas"
+            });
+            //Añadimos la partida a la base de datos
+            nuevaPartida.save(function (err) {
+                if (err) return res.status(500).send('Error en la petición');
+                return res.send({ mensaje: 'No hay nadie esperando partida, cuando aparezca un contrincante se añadira la partida a tu lista de partidas' });
+            });
+        } else {
+            return res.send(partida);
+        }            
+        }
+    );    
+}

@@ -19,5 +19,6 @@ module.exports=(router) =>{
     router.get('/game/inProgress',Users.gameInProgress);
     router.post('/game/accept',Users.gameAccept);
     router.post('/game/dismiss',Users.gameDismiss);
+    router.post('/game/random',Users.blindMatch);
 }
 
