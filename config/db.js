@@ -3,7 +3,7 @@ require('dotenv').config({ path: 'variables.env'});
 
 module.exports =() =>{
     mongoose.connect(process.env.DB_URL, {useNewUrlParser:true, useFindAndModify: false,useUnifiedTopology: true })
-    .then(() => console.log(`Mongo connected on ${DB_URL}`))
+    .then(() => console.log(`Mongo connected on ${process.env.DB_URL}`))
     .catch(err => console.log(`Connection has error ${err}`))
     //mongoose.set('useFindAndModify', false);
     process.on('SIGINT',()=> {
