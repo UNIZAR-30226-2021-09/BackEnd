@@ -282,23 +282,32 @@ exports.userDismiss=(req,res)=>{
     )
 }
 
-exports.crearPartida=(req,res)=>{
+exports.newGame=(req,res)=>{
+    //comprobamos que el usuario a retar está en tu lista de amigos
+    User.find(
+    {
+        nombreUsuario:req.body.nombreUsuario,
+        amigos:req.body.nombreAmigo
+    },
+    (err,result)=>{
+    if (err) return res.status(500).send('Server Error');
+    if(!result){
+        return res.status(500).send(
+        `El usuario ${req.body.nombreAmigo} no está en tu lista de amigos`)
+    }
     const partida= new Partida ({
-        participante1: req.body.participante1,
-        participante2: req.body.participante2,
-        ganador: req.body.ganador,
-        estado: "finalizada",
+        participante1: req.body.nombreUsuario,
+        participante2: req.body.nombreAmigo,
+        ganador: undefined,
+        estado: "enCurso",
         tipo: "amistoso"
     });
-    if (req.body.participante1==req.body.participante2){
-        return res.status(500).send('No puedes enviar una solicitud de amistad a ti mismo');
-    }
     //Añadimos la partida a la base de datos
     partida.save(function (err) {
-        if (err) return res.status(500).send('Error en la petición');
+        if (err) return res.status(500).send('Error al crear la partida');
         //devolvemos la lista de solicitudes pendientes
         return res.send(partida);
-    });
+    });});
 }
 
 exports.gameIA=(req,res)=>{
