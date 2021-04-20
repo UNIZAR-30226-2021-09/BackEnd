@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
+</head>
+<body>
+    
+<script>
+  const socket = io.connect("http://localhost:3001");
+    socket.emit("getIntoAllGames", { nombreUsuario: "User4"});
+    socket.on("incomingMovement", (mv) => {
+        console.log("ha llegado");
+    });
+    socket.emit("movement", { mv: {fila: 1, columna: 2}, game: {_id: "607dac76c28621fede875ba1"}});
+</script>
+</body>

@@ -287,7 +287,7 @@ exports.crearPartida=(req,res)=>{
         participante1: req.body.participante1,
         participante2: req.body.participante2,
         ganador: req.body.ganador,
-        estado: "finalizada",
+        estado: "enCurso",
         tipo: "amistoso"
     });
     if (req.body.participante1==req.body.participante2){
