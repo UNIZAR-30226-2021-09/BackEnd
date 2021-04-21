@@ -5,10 +5,14 @@ const authRoutes = require('./routers/routers');
 const express = require('express');
 const properties = require('./config/properties');
 const DB = require('./config/db');
+const app = express();
+const server = require("http").createServer(app);
+const io = require("socket.io")(server, { cors: { origin: "*" } });
+require('./controllers/sockets.js')(io);
+
 //init DB
 DB();
 
-const app = express();
 const router=express.Router();
 const bodyParser=require('body-parser');
 const bodyParserJSON = bodyParser.json();
@@ -25,6 +29,4 @@ router.get('/', (req, res)=>{
 });
 
 app.use(router);
-app.listen(properties.PORT,()=> console.log(`server running on port ${properties.PORT}`));
-
-
+server.listen(properties.PORT,()=> console.log(`server running on port ${properties.PORT}`));

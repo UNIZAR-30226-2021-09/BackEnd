@@ -45,6 +45,7 @@ const partidaSchema = new Schema ({
             columna: {
                 type: Number
             },
+            //disparada
             estado: {
                 type: String
             }
