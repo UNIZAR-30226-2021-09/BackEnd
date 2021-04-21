@@ -8,12 +8,27 @@ const Request = mongoose.model('Requests',requestSchema);
 const partidaSchema = require('../models/partidas');
 const Partida = mongoose.model('Partidas',partidaSchema);
 
+var userSockets = new Map();
+
 module.exports = function(io) {
 
   // socket connection
 io.on("connection", (socket) => {
   console.log("conectado");
   
+  //añadir al array al usuario con su socket actual
+  socket.on("logMe", (user) => {
+    userSockets.set(user.nombreUsuario.toString(), socket.id.toString());
+    console.log(userSockets);
+  })
+
+  //Redirigir
+  socket.on("friendPetition", (user) => {
+    let friendSocket = userSockets.get(user.nombreUsuario.toString());
+    console.log(friendSocket);
+    socket.to(friendSocket).emit("llegaInvitacion");
+  })
+
   //entrar en una sala por partida en curso
   socket.on("getIntoAllGames", (user) => {
     Partida.find(
@@ -72,17 +87,16 @@ io.on("connection", (socket) => {
   
   //cuando creas o aceptas una partida se te une a su room
   socket.on("joinGame", (room) => {
-      socket.join(room);
+      socket.join(room.toString());
       //socket.to(room).broadcast.emit("notification joined");
   });
 
   //cuando acaba una partida se te saca de su room
-  socket.on("leave-group", (room) =>
-    socket.leave(room, () => {
+  socket.on("leaveGame", (room) =>
+    socket.leave(room.toString(), () => {
       socket
-        .to(room)
-        .broadcast.emit("notification", `${getUserRoom(socket.id).user} left`);
-      removeUser({ id: socket.id });
+        .to(room.toString())
+        .broadcast.emit("gameEnded");
     })
   );
 
