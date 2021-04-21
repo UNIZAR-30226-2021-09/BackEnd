@@ -9,7 +9,7 @@ module.exports=(router) =>{
     router.get('/user/outgoingRequests',Users.friendOutgoingRequests);
     router.post('/user/accept',Users.userAccept );
     router.post('/user/dismiss',Users.userDismiss );
-    router.post('/crearPartida',Users.crearPartida );
+    router.post('/game/newGame',Users.newGame );
     router.use('/game',Users.autentificar);
     router.get('/game/history',Users.history);
     router.post('/game/ia',Users.gameIA );
