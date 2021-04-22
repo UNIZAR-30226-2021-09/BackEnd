@@ -39,7 +39,7 @@ exports.loginUser= (req, res) => {
         contrasena: req.body.contrasena
     }
     User.findOne({nombreUsuario: userData.nombreUsuario}, (err,user)=>{
-        if(err) return res.status(500).send({ mensaje:'Server error!'});
+        if(err) return res.status(500).send({ mensaje:'no existe el usuario'});
         
         if(!user){
             // No existe el email
