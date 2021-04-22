@@ -118,7 +118,7 @@ exports.loginUser= (req, res) => {
                 });});});
             }else{
                 // contraseña equivocada
-                return res.status(409).send({mensaje: 'Something is wrong'});
+                return res.status(409).send({mensaje: 'contraseña equivocada'});
             }
         }
  
