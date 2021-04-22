@@ -39,11 +39,11 @@ exports.loginUser= (req, res) => {
         contrasena: req.body.contrasena
     }
     User.findOne({nombreUsuario: userData.nombreUsuario}, (err,user)=>{
-        if(err) return res.status(500).send({ mensaje:'no existe el usuario'});
+        if(err) return res.status(500).send({ mensaje:'error mongoose'});
         
         if(!user){
             // No existe el email
-            return res.status(409).send({mensaje: 'Something is wrong'});
+            return res.status(409).send({mensaje: 'no existe el usuario'});
         } else{
             //correcto
             resultPassword =bcrypt.compareSync( userData.contrasena, user.contrasena);
