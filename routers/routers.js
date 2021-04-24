@@ -2,15 +2,16 @@ const Users = require('../controllers/Controller');
 module.exports=(router) =>{
     router.post('/signin',Users.register );
     router.post('/login',Users.loginUser );
-    router.post('/user',Users.autentificar);
+    router.use('/user',Users.autentificar);
     router.post('/user/addfriend',Users.addFriend );
     router.post('/user/friendList',Users.friendList );
     router.post('/user/incomingRequests',Users.friendIncomingRequests);
     router.post('/user/outgoingRequests',Users.friendOutgoingRequests);
     router.post('/user/accept',Users.userAccept );
     router.post('/user/dismiss',Users.userDismiss );
+    router.post('/user/ranking',Users.ranking);
+    router.use('/game',Users.autentificar);
     router.post('/game/newGame',Users.newGame );
-    router.post('/game',Users.autentificar);
     router.post('/game/history',Users.history);
     router.post('/game/ia',Users.gameIA );
     router.post('/game/friend',Users.gameFriend);
@@ -20,5 +21,6 @@ module.exports=(router) =>{
     router.post('/game/accept',Users.gameAccept);
     router.post('/game/dismiss',Users.gameDismiss);
     router.post('/game/random',Users.blindMatch);
+
 }
 

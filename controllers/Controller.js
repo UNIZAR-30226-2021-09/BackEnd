@@ -39,11 +39,11 @@ exports.loginUser= (req, res) => {
         contrasena: req.body.contrasena
     }
     User.findOne({nombreUsuario: userData.nombreUsuario}, (err,user)=>{
-        if(err) return res.status(500).send({ mensaje:'error mongoose'});
+        if(err) return res.status(500).send({ mensaje:'Server error!'});
         
         if(!user){
             // No existe el email
-            return res.status(409).send({mensaje: 'no existe el usuario'});
+            return res.status(409).send({mensaje: 'Something is wrong'});
         } else{
             //correcto
             resultPassword =bcrypt.compareSync( userData.contrasena, user.contrasena);
@@ -118,7 +118,7 @@ exports.loginUser= (req, res) => {
                 });});});
             }else{
                 // contraseña equivocada
-                return res.status(409).send({mensaje: 'contraseña equivocada'});
+                return res.status(409).send({mensaje: 'Something is wrong'});
             }
         }
  
@@ -129,7 +129,11 @@ exports.register=(req,res)=>{
     const newUser={
         nombreUsuario: req.body.nombreUsuario,
         email: req.body.email,
-        contrasena: bcrypt.hashSync(req.body.contrasena)
+        contrasena: bcrypt.hashSync(req.body.contrasena),
+        puntos:0,
+        partidasGanadas:0,
+        partidasPerdidas:0,
+        torneosGanados:0
     }
     if(newUser.nombreUsuario=="I.A") return res.status(409).send({ mensaje:'Nombre reservado'});
     User.create(newUser,(err,user)=>{//añadimos al usuario a la base de datos
@@ -150,7 +154,11 @@ exports.register=(req,res)=>{
                 nombreUsuario: user.nombreUsuario,
                 email: user.email,
                 accessToken: accessToken,
-                expiresIn: expiresIn
+                expiresIn: expiresIn,
+                puntos:0,
+                partidasGanadas:0,
+                partidasPerdidas:0,
+                torneosGanados:0
             }
         //devolvemos los datos del usuario creado
         return res.send(dataUser);
@@ -175,7 +183,6 @@ exports.addFriend=(req,res)=>{
             return res.send(oReq);
         });
     });
-
 }
 
 exports.friendList=(req,res)=>{
@@ -481,21 +488,27 @@ exports.gameDismiss=(req,res)=>{
 }
 
 exports.blindMatch=(req,res)=>{
-    Partida.find(
-        {
-            estado: "pendiente",
-            tipo: "ciegas"
-        },
+    Partida.findOneAndUpdate(
+        {$and:[
+            {
+                estado:"pendiente"
+            },{
+                tipo:"ciegas"
+            },
+            {participante1:{$ne: req.body.nombreUsuario},
+            }
+        ]}
+        ,
         {
             participante2: req.body.nombreUsuario,
             estado: "enCurso"
         },
-        null,
+        {new: true},
         (err,partida)=>{
         if (err) return res.status(500).send('Server error!');
         if (!partida) {
             const nuevaPartida= new Partida ({
-                participante1: req.body.participante1,                    
+                participante1: req.body.nombreUsuario,                    
                 estado: "pendiente",
                 tipo: "ciegas"
             });
@@ -509,4 +522,47 @@ exports.blindMatch=(req,res)=>{
         }            
         }
     );    
+}
+
+exports.ranking=(req,res)=>{
+    //Lista de jugadores ordenada por puntos
+    User.find(
+        null
+        ,
+        null,
+        { sort: { 'puntos': 'desc' }, limit: 10 },
+        (err,result)=>{
+        if (err) return res.status(500).send('Error al buscar el listado de usuarios');
+        ranking = result.map(function(item){
+            return {
+                nombreUsuario: item.nombreUsuario,
+                puntos: item.puntos,
+                partidasGanadas: item.partidasGanadas,
+                partidasPerdidas: item.partidasPerdidas
+            };
+        });
+        //buscar los puntos que tiene mi usuario
+        User.findOne(
+            {
+                nombreUsuario:req.body.nombreUsuario,
+            },
+            (err,result)=>{
+            if (err) return res.status(500).send(`Error al encontrar el usuario ${req.body.nombreUsuario}`);
+            mypoints= result.puntos;
+            console.log(mypoints,result);
+            //Contar el numero de usuarios con más puntos que yo
+            User.count(
+                {
+                    puntos:{$gt:mypoints}
+                },(err,result) =>{
+                    if (err) return res.status(500).send(`Error al calcular tu posicion en el ranking`);
+                    posicion=result+1;
+                    console.log(mypoints,result);
+                    respuesta= {
+                        ranking: ranking,
+                        posicion: posicion
+                    }
+
+                    return res.send(respuesta);
+            });});});  
 }
