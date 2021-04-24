@@ -112,6 +112,7 @@ exports.loginUser= (req, res) => {
                     partidasGanadas:user.partidasGanadas,
                     partidasPerdidas:user.partidasPerdidas,
                     torneosGanados:user.torneosGanados,
+                    puntos:user.puntos,
                     historial:historial
                 }
                 res.send(dataUser);
