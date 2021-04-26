@@ -573,3 +573,18 @@ exports.ranking=(req,res)=>{
                     return res.send(respuesta);
             });});});  
 }
+
+exports.me=(req,res)=>{
+    User.findOne({nombreUsuario: req.body.nombreUsuario}, (err,user)=>{
+        if(err) return res.status(500).send({ mensaje:`No se ha encontrado el usuario ${req.body.nombreUsuario}`});
+        const dataUser ={
+            nombreUsuario: user.nombreUsuario,
+            amigos: user.amigos,
+            puntos: user.puntos,
+            partidasGanadas:user.partidasGanadas,
+            partidasPerdidas:user.partidasPerdidas,
+            torneosGanados:user.torneosGanados
+        }
+        return res.send(dataUser);
+    });
+}
