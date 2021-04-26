@@ -547,10 +547,9 @@ exports.ranking=(req,res)=>{
             {
                 nombreUsuario:req.body.nombreUsuario,
             },
-            (err,result)=>{
+            (err,user)=>{
             if (err) return res.status(500).send(`Error al encontrar el usuario ${req.body.nombreUsuario}`);
-            mypoints= result.puntos;
-            console.log(mypoints,result);
+            mypoints= user.puntos;
             //Contar el numero de usuarios con más puntos que yo
             User.count(
                 {
@@ -561,7 +560,14 @@ exports.ranking=(req,res)=>{
                     console.log(mypoints,result);
                     respuesta= {
                         ranking: ranking,
-                        posicion: posicion
+                        me:{
+                            nombreUsuario: user.nombreUsuario,
+                            posicion: posicion,
+                            puntos: user.puntos,
+                            partidasGanadas: user.partidasGanadas,
+                            partidasPerdidas: user.partidasPerdidas
+                        }
+                        
                     }
 
                     return res.send(respuesta);
