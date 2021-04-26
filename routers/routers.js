@@ -10,6 +10,7 @@ module.exports=(router) =>{
     router.post('/user/accept',Users.userAccept );
     router.post('/user/dismiss',Users.userDismiss );
     router.post('/user/ranking',Users.ranking);
+    router.post('/user/me',Users.me);
     router.use('/game',Users.autentificar);
     router.post('/game/newGame',Users.newGame );
     router.post('/game/history',Users.history);
