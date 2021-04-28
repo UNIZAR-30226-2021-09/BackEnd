@@ -2,6 +2,7 @@ const Users = require('../controllers/Controller');
 module.exports=(router) =>{
     router.post('/signin',Users.register );
     router.post('/login',Users.loginUser );
+    router.post('/profile',Users.profile );
     router.use('/user',Users.autentificar);
     router.post('/user/addfriend',Users.addFriend );
     router.post('/user/friendList',Users.friendList );
