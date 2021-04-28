@@ -25,6 +25,7 @@ io.on("connection", (socket) => {
   //Redirigir
   socket.on("friendPetition", (user) => {
     let friendSocket = userSockets.get(user.nombreUsuario.toString());
+    console.log("llega peticion de amistad" + user.nombreUsuario.toString());
     console.log(friendSocket);
     socket.to(friendSocket).emit("llegaInvitacion");
   })
