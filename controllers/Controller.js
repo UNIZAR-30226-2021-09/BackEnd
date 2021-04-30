@@ -603,6 +603,7 @@ exports.profile=(req,res)=>{
                 partidasGanadas:user.partidasGanadas,
                 partidasPerdidas:user.partidasPerdidas,
                 torneosGanados:user.torneosGanados,
+                posicion: posicion
             }
             return res.send(dataUser);
             });
