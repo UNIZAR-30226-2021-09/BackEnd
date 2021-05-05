@@ -29,6 +29,13 @@ io.on("connection", (socket) => {
     console.log(friendSocket);
     socket.to(friendSocket).emit("llegaInvitacion");
   })
+  
+  socket.on("aceptarInvitacionAmigo", (user) => {
+    let friendSocket = userSockets.get(user.nombreUsuario.toString());
+    console.log("llega peticion aceptar amigo" + user.nombreUsuario.toString());
+    console.log(friendSocket);
+    socket.to(friendSocket).emit("llegaAceptarInvitacionAmigo");
+  })
 
   //entrar en una sala por partida en curso
   socket.on("getIntoAllGames", (user) => {
