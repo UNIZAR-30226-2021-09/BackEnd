@@ -411,13 +411,16 @@ exports.gameInProgress=(req,res)=>{
         peticiones = result.map(function(item){
             if(req.body.nombreUsuario==item.participante1){
                 contrincante=item.participante2;
+                turno= (item.turno=="TurnoJ1")
             }else{
                 contrincante=item.participante1;
+                turno=(item.turno=="TurnoJ2")
             }
             return {
                 contrincante: contrincante,
                 tipo:item.tipo,
-                id: item._id
+                id: item._id,
+                tuTurno: turno
             };
         });
         return res.send(peticiones);
