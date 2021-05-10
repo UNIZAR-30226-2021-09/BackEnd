@@ -606,6 +606,7 @@ exports.profile=(req,res)=>{
                 partidasGanadas:user.partidasGanadas,
                 partidasPerdidas:user.partidasPerdidas,
                 torneosGanados:user.torneosGanados,
+                email:user.email,
                 posicion: posicion
             }
             return res.send(dataUser);
