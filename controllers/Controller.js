@@ -112,6 +112,7 @@ exports.loginUser= (req, res) => {
                     partidasGanadas:user.partidasGanadas,
                     partidasPerdidas:user.partidasPerdidas,
                     torneosGanados:user.torneosGanados,
+                    puntos:user.puntos,
                     historial:historial
                 }
                 res.send(dataUser);
@@ -129,7 +130,11 @@ exports.register=(req,res)=>{
     const newUser={
         nombreUsuario: req.body.nombreUsuario,
         email: req.body.email,
-        contrasena: bcrypt.hashSync(req.body.contrasena)
+        contrasena: bcrypt.hashSync(req.body.contrasena),
+        puntos:0,
+        partidasGanadas:0,
+        partidasPerdidas:0,
+        torneosGanados:0
     }
     if(newUser.nombreUsuario=="I.A") return res.status(409).send({ mensaje:'Nombre reservado'});
     User.create(newUser,(err,user)=>{//añadimos al usuario a la base de datos
@@ -150,7 +155,11 @@ exports.register=(req,res)=>{
                 nombreUsuario: user.nombreUsuario,
                 email: user.email,
                 accessToken: accessToken,
-                expiresIn: expiresIn
+                expiresIn: expiresIn,
+                puntos:0,
+                partidasGanadas:0,
+                partidasPerdidas:0,
+                torneosGanados:0
             }
         //devolvemos los datos del usuario creado
         return res.send(dataUser);
@@ -175,7 +184,6 @@ exports.addFriend=(req,res)=>{
             return res.send(oReq);
         });
     });
-
 }
 
 exports.friendList=(req,res)=>{
@@ -403,13 +411,16 @@ exports.gameInProgress=(req,res)=>{
         peticiones = result.map(function(item){
             if(req.body.nombreUsuario==item.participante1){
                 contrincante=item.participante2;
+                turno= (item.turno=="TurnoJ1")
             }else{
                 contrincante=item.participante1;
+                turno=(item.turno=="TurnoJ2")
             }
             return {
                 contrincante: contrincante,
                 tipo:item.tipo,
-                id: item._id
+                id: item._id,
+                tuTurno: turno
             };
         });
         return res.send(peticiones);
@@ -481,21 +492,27 @@ exports.gameDismiss=(req,res)=>{
 }
 
 exports.blindMatch=(req,res)=>{
-    Partida.find(
-        {
-            estado: "pendiente",
-            tipo: "ciegas"
-        },
+    Partida.findOneAndUpdate(
+        {$and:[
+            {
+                estado:"pendiente"
+            },{
+                tipo:"ciegas"
+            },
+            {participante1:{$ne: req.body.nombreUsuario},
+            }
+        ]}
+        ,
         {
             participante2: req.body.nombreUsuario,
             estado: "enCurso"
         },
-        null,
+        {new: true},
         (err,partida)=>{
         if (err) return res.status(500).send('Server error!');
         if (!partida) {
             const nuevaPartida= new Partida ({
-                participante1: req.body.participante1,                    
+                participante1: req.body.nombreUsuario,                    
                 estado: "pendiente",
                 tipo: "ciegas"
             });
@@ -509,4 +526,90 @@ exports.blindMatch=(req,res)=>{
         }            
         }
     );    
+}
+
+exports.ranking=(req,res)=>{
+    //Lista de jugadores ordenada por puntos
+    User.find(
+        null
+        ,
+        null,
+        { sort: { 'puntos': 'desc' }, limit: 10 },
+        (err,result)=>{
+        if (err) return res.status(500).send('Error al buscar el listado de usuarios');
+        ranking = result.map(function(item){
+            return {
+                nombreUsuario: item.nombreUsuario,
+                puntos: item.puntos,
+                partidasGanadas: item.partidasGanadas,
+                partidasPerdidas: item.partidasPerdidas
+            };
+        });
+        //buscar los puntos que tiene mi usuario
+        User.findOne(
+            {
+                nombreUsuario:req.body.nombreUsuario,
+            },
+            (err,user)=>{
+            if (err) return res.status(500).send(`Error al encontrar el usuario ${req.body.nombreUsuario}`);
+            mypoints= user.puntos;
+            //Contar el numero de usuarios con más puntos que yo
+            User.count(
+                {
+                    puntos:{$gt:mypoints}
+                },(err,result) =>{
+                    if (err) return res.status(500).send(`Error al calcular tu posicion en el ranking`);
+                    posicion=result+1;
+                    respuesta= {
+                        ranking: ranking,
+                        me:{
+                            nombreUsuario: user.nombreUsuario,
+                            posicion: posicion,
+                            puntos: user.puntos,
+                            partidasGanadas: user.partidasGanadas,
+                            partidasPerdidas: user.partidasPerdidas
+                        }
+                        
+                    }
+
+                    return res.send(respuesta);
+            });});});  
+}
+
+exports.me=(req,res)=>{
+    User.findOne({nombreUsuario: req.body.nombreUsuario}, (err,user)=>{
+        if(err) return res.status(500).send({ mensaje:`No se ha encontrado el usuario ${req.body.nombreUsuario}`});
+        const dataUser ={
+            nombreUsuario: user.nombreUsuario,
+            amigos: user.amigos,
+            puntos: user.puntos,
+            partidasGanadas:user.partidasGanadas,
+            partidasPerdidas:user.partidasPerdidas,
+            torneosGanados:user.torneosGanados
+        }
+        return res.send(dataUser);
+    });
+}
+
+exports.profile=(req,res)=>{
+    User.findOne({nombreUsuario: req.body.nombreUsuario}, (err,user)=>{
+        if(err) return res.status(500).send({ mensaje:`No se ha encontrado el usuario ${req.body.nombreUsuario}`});
+        User.count(
+            {
+                puntos:{$gt:user.puntos}
+            },(err,result) =>{
+            if (err) return res.status(500).send(`Error al calcular tu posicion en el ranking`);
+            posicion=result+1;
+            const dataUser ={
+                nombreUsuario: user.nombreUsuario,
+                puntos: user.puntos,
+                partidasGanadas:user.partidasGanadas,
+                partidasPerdidas:user.partidasPerdidas,
+                torneosGanados:user.torneosGanados,
+                email:user.email,
+                posicion: posicion
+            }
+            return res.send(dataUser);
+            });
+    });
 }
