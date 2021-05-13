@@ -411,10 +411,21 @@ exports.gameInProgress=(req,res)=>{
         peticiones = result.map(function(item){
             if(req.body.nombreUsuario==item.participante1){
                 contrincante=item.participante2;
-                turno= (item.turno=="TurnoJ1")
+                if(item.turno=="TurnoJ1"){
+                    turno= "TuTurno";
+                }else{
+                    turno= "TurnoRival";
+                }
             }else{
                 contrincante=item.participante1;
-                turno=(item.turno=="TurnoJ2")
+                if(item.turno=="TurnoJ2"){
+                    turno= "TuTurno";
+                }else{
+                    turno= "TurnoRival";
+                }
+            }
+            if(item.turno!="TurnoJ2" && item.turno=="TurnoJ1"){
+                turno= "ColocandoBarcos";
             }
             return {
                 contrincante: contrincante,
