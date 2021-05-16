@@ -1158,3 +1158,41 @@ exports.infoPartida=(req,res)=>{
     
     });
 }
+
+
+exports.cogerTablero=(req,res)=>{
+    Partida.findById(
+    {
+        _id: req.body.gameid
+    },(err,partida) =>{
+    if (err) return res.status(500).send('Server error!');
+    if(!partida) return res.status(500).send('No existe una partida con esa id');
+    if(partida.participante1!=req.body.nombreUsuario && partida.participante2!=req.body.nombreUsuario) return res.status(500).send('No perteneces a esta partida');
+    if(partida.participante1==req.body.nombreUsuario){
+        //Tablero visible para J1
+        tuTablero=partida.tablero1;
+        tusBarcos=partida.barcos1.barcos;
+        disparos=partida.tablero2;
+        barcosHundidosRival=[];
+        for(var i = 0; i < partida.barcos2.barcos.length; ++i){
+            if(partida.barcos2.barcos[i].estado =="hundido" ) barcosHundidosRival.push(partida.barcos2.barcos[i]);
+        }
+    }else{
+        //Tablero visible para J2
+        tuTablero=partida.tablero2;
+        tusBarcos=partida.barcos2.barcos;
+        disparos=partida.tablero1;
+        barcosHundidosRival=[];
+        for(var i = 0; i < partida.barcos1.barcos.length; ++i){
+            if(partida.barcos1.barcos[i].estado =="hundido" ) barcosHundidosRival.push(partida.barcos1.barcos[i]);
+        }
+    }
+    respuesta={
+        tuTablero:tuTablero,
+        tusBarcos:tusBarcos,
+        disparos:disparos,
+        barcosHundidosRival:barcosHundidosRival
+    }
+    return res.send(respuesta);
+    });
+}

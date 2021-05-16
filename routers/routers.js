@@ -26,6 +26,7 @@ module.exports=(router) =>{
     router.post('/match/colocarBarcos',Users.colocarBarcos);
     router.post('/match/movimiento',Users.disparo);
     router.post('/match/infoPartida',Users.infoPartida);
+    router.post('/match/cogerTablero',Users.cogerTablero);
     router.use('/match',Users.autentificar);
 }
 
