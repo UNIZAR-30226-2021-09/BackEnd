@@ -580,6 +580,7 @@ exports.blindMatch=(req,res)=>{
                 participante1: req.body.nombreUsuario,                    
                 estado: "pendiente",
                 tipo: "ciegas",
+                ganador:undefined,
                 barcos1:
                 {
                     colocados: false,
@@ -826,9 +827,9 @@ exports.disparo=(req,res)=>{
     },(err,partida) =>{
         if (err) return res.status(500).send('Server error!');
         if(!partida) return res.status(500).send('No existe una partida con esa id');
-        if(!partida) return res.status(500).send('No existe una partida con esa id');
         if(partida.participante1!=req.body.nombreUsuario && partida.participante2!=req.body.nombreUsuario) return res.status(500).send('No perteneces a esta partida');
-        if(partida.estado!="enCurso"||partida.subestado=="colocandoBarcos") return res.status(500).send('Todavía falta algun jugador por colocar sus barcos');
+        if(partida.estado!="enCurso") return res.status(500).send('No puedes realizar disparos ahora mismo');
+        if(partida.subestado=="colocandoBarcos") return res.status(500).send('Aún falta que algún jugador coloque sus barcos');
         if(partida.participante1==req.body.nombreUsuario) {
             if(partida.subestado!="turnoJ1") return res.status(500).send('No es tu turno');
             disparo={
@@ -841,6 +842,7 @@ exports.disparo=(req,res)=>{
             partida.subestado="turnoJ1"
             //busca un barco del J2 que tenga un barco que tenga una coordenada que coincida con el disparo
             tocado=false;
+            fin=false;
             for (var i in partida.barcos2.barcos) {
                 console.log("Hey",partida.barcos2.barcos[i]);
                 if (partida.barcos2.barcos[i].coordenadas.find(coordenada=>(coordenada.fila==disparo.fila)
@@ -868,12 +870,35 @@ exports.disparo=(req,res)=>{
                         barco  = partida.barcos2.barcos.find(barco=> barco.estado!="hundido");
                         if(!barco){
                             //no quedan barcos en pie "HAS GANADO"
+                            fin=true;
                             partida.ganador=req.body.nombreUsuario;
                             partida.estado="finalizada";
+                            //Estadisticas de partida
+                            ganador=(partida.ganador==req.body.nombreUsuario);
+                            puntos=20;
+                            if(partida.tipo!="ciegas") puntos=0;
+                            disparosRealizados=partida.tablero2.length;
+                            //El número de barcos destruidos
+                            barcosDestuidos = 0;
+                            for(var i = 0; i < partida.barcos2.barcos.length; ++i){
+                                if(partida.barcos2.barcos[i].estado =="hundido" ) barcosDestuidos++;
+                            }
+                            //El número de disparos acertados
+                            disparosAcertados=0;
+                            for(var i = 0; i < partida.tablero2.length; ++i){
+                                if(partida.tablero2[i].casilla.estado =="acierto" ) disparosAcertados++;
+                            }
                             respuesta={
                                 disparo:"hundido",
                                 barco:partida.barcos2.barcos[i],
-                                fin:true                                
+                                fin:true,  
+                                infoPartida:{
+                                    ganador:ganador,
+                                    puntos:puntos,
+                                    disparosRealizados:disparosRealizados,
+                                    barcosDestuidos:barcosDestuidos,
+                                    disparosAcertados:disparosAcertados
+                                }                              
                             }
                         }else{
                             //has hundido un barco, pero siguen barcos en pie
@@ -952,12 +977,35 @@ exports.disparo=(req,res)=>{
                         barco  = partida.barcos1.barcos.find(barco=> barco.estado!="hundido");
                         if(!barco){
                             //no quedan barcos en pie "HAS GANADO"
+                            fin=true;
                             partida.ganador=req.body.nombreUsuario;
                             partida.estado="finalizada";
+                            //Estadisticas de partida
+                            ganador=(partida.ganador==req.body.nombreUsuario);
+                            puntos=20;
+                            if(partida.tipo!="ciegas") puntos=0;
+                            disparosRealizados=partida.tablero1.length;
+                            //El número de barcos destruidos
+                            barcosDestuidos = 0;
+                            for(var i = 0; i < partida.barcos1.barcos.length; ++i){
+                                if(partida.barcos1.barcos[i].estado =="hundido" ) barcosDestuidos++;
+                            }
+                            //El número de disparos acertados
+                            disparosAcertados=0;
+                            for(var i = 0; i < partida.tablero1.length; ++i){
+                                if(partida.tablero1[i].casilla.estado =="acierto" ) disparosAcertados++;
+                            }
                             respuesta={
                                 disparo:"hundido",
                                 barco:partida.barcos1.barcos[i],
-                                fin:true                                
+                                fin:true,  
+                                infoPartida:{
+                                    ganador:ganador,
+                                    puntos:puntos,
+                                    disparosRealizados:disparosRealizados,
+                                    barcosDestuidos:barcosDestuidos,
+                                    disparosAcertados:disparosAcertados
+                                }                              
                             }
                         }else{
                             //has hundido un barco, pero siguen barcos en pie
@@ -988,16 +1036,125 @@ exports.disparo=(req,res)=>{
                 respuesta={disparo:"fallo",fin:false};
             }
             Partida.findByIdAndUpdate( 
-                { 
-                    _id: req.body.gameid
-                },
-                partida
-                ,
-                (err,partida2) =>{
-                    if (err) return res.status(500).send('Server error!');  
+            { _id: req.body.gameid },
+            partida
+            ,
+            (err,partida2) =>{
+                if (err) return res.status(500).send('Server error!');  
+                if(!fin){
                     return res.send(respuesta);
-                });
+                }else{
+                    //HAS GANADO, actualizamos los marcadores del usuario
+                    User.findOneAndUpdate(
+                    { 
+                        nombreUsuario: req.body.nombreUsuario,
+                    },
+                    {
+                        $inc: { 'partidasGanadas':1,'puntos':respuesta.infoPartida.puntos}                
+                    },
+                    {new: true},
+                    (err,myuser) =>{
+                    if(err) return res.status(500).send('Server error!');
+                    if(!myuser)return res.status(500).send({mensaje: 'Error al actualizar los datos del usuario' });
+                    
+                    //Actualizamos los datos del rival
+                    if(partida.participante1==req.body.nombreUsuario){
+                        rival=partida.participante2;
+                    }else{
+                        rival=partida.participante1;
+                    }
+                    User.findOneAndUpdate(
+                    { 
+                        nombreUsuario: rival,
+                    },
+                    {
+                        $inc: { 'partidasPerdidas':1,'puntos':-respuesta.infoPartida.puntos}                
+                    },
+                    {new: true},
+                    (err,myuser2) =>{
+                    if(err) return res.status(500).send('Server error!');
+                    if(!myuser2)return res.status(500).send({mensaje: 'Error al actualizar los datos del rival' });
+                    
+                        return res.send(respuesta);
+            
+                    });});
+                }
+            });
         }
     })
 };
 
+exports.infoPartida=(req,res)=>{
+    Partida.findById(
+    {
+        _id: req.body.gameid
+    },(err,partida) =>{
+    if (err) return res.status(500).send('Server error!');
+    if(!partida) return res.status(500).send('No existe una partida con esa id');
+    if(partida.participante1!=req.body.nombreUsuario && partida.participante2!=req.body.nombreUsuario) return res.status(500).send('No perteneces a esta partida');
+    if(partida.participante1==req.body.nombreUsuario){
+        console.log(partida);
+        //Estadisticas de partida del J1
+        ganador=(partida.ganador==req.body.nombreUsuario);
+        if(ganador){
+            puntos=20;
+        }else{
+            puntos=-20;
+        }
+        if(partida.tipo!="ciegas") puntos=0;
+        disparosRealizados=partida.tablero2.length;
+        //El número de barcos destruidos
+        barcosDestuidos = 0;
+        for(var i = 0; i < partida.barcos2.barcos.length; ++i){
+            if(partida.barcos2.barcos[i].estado =="hundido" ) barcosDestuidos++;
+        }
+        //El número de disparos acertados
+        disparosAcertados=0;
+        for(var i = 0; i < partida.tablero2.length; ++i){
+            if(partida.tablero2[i].casilla.estado =="acierto" ) disparosAcertados++;
+        }
+        respuesta={
+            infoPartida:{
+                ganador:ganador,
+                puntos:puntos,
+                disparosRealizados:disparosRealizados,
+                barcosDestuidos:barcosDestuidos,
+                disparosAcertados:disparosAcertados
+            }                              
+        }
+        return res.send(respuesta);
+    }else{
+        //Estadisticas de partida del J2
+        ganador=(partida.ganador==req.body.nombreUsuario);
+        if(ganador){
+            puntos=20;
+        }else{
+            puntos=-20;
+        }
+        if(partida.tipo!="ciegas") puntos=0;
+       
+        disparosRealizados=partida.tablero1.length;
+        //El número de barcos destruidos
+        barcosDestuidos = 0;
+        for(var i = 0; i < partida.barcos1.barcos.length; ++i){
+            if(partida.barcos1.barcos[i].estado =="hundido" ) barcosDestuidos++;
+        }
+        //El número de disparos acertados
+        disparosAcertados=0;
+        for(var i = 0; i < partida.tablero1.length; ++i){
+            if(partida.tablero1[i].estado =="acierto" ) disparosAcertados++;
+        }
+        respuesta={
+            infoPartida:{
+                ganador:ganador,
+                puntos:puntos,
+                disparosRealizados:disparosRealizados,
+                barcosDestuidos:barcosDestuidos,
+                disparosAcertados:disparosAcertados
+            }                              
+        }
+        return res.send(respuesta);
+    }
+    
+    });
+}

@@ -25,6 +25,7 @@ module.exports=(router) =>{
     router.post('/game/random',Users.blindMatch);
     router.post('/match/colocarBarcos',Users.colocarBarcos);
     router.post('/match/movimiento',Users.disparo);
+    router.post('/match/infoPartida',Users.infoPartida);
     router.use('/match',Users.autentificar);
 }
 
