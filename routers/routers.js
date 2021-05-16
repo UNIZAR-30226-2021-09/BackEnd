@@ -23,6 +23,8 @@ module.exports=(router) =>{
     router.post('/game/accept',Users.gameAccept);
     router.post('/game/dismiss',Users.gameDismiss);
     router.post('/game/random',Users.blindMatch);
-
+    router.post('/match/colocarBarcos',Users.colocarBarcos);
+    router.post('/match/movimiento',Users.disparo);
+    router.use('/match',Users.autentificar);
 }
 

@@ -308,7 +308,18 @@ exports.newGame=(req,res)=>{
         participante2: req.body.nombreAmigo,
         ganador: undefined,
         estado: "enCurso",
-        tipo: "amistoso"
+        subestado: "colocandoBarcos",
+        tipo: "amistoso",
+        barcos1:
+        {
+            colocados: false,
+            barcos:[]
+        },
+        barcos2:
+        {
+            colocados: false,
+            barcos:[]
+        }
     });
     //Añadimos la partida a la base de datos
     partida.save(function (err) {
@@ -324,7 +335,18 @@ exports.gameIA=(req,res)=>{
         participante2: "I.A",
         ganador: undefined,
         estado: "enCurso",
-        tipo: "ia"
+        subestado: "colocandoBarcos",
+        tipo: "ia",
+        barcos1:
+        {
+            colocados: false,
+            barcos:[]
+        },
+        barcos2:
+        {
+            colocados: false,
+            barcos:[]
+        },
     });
     //Añadimos la partida a la base de datos
     partida.save(function (err) {
@@ -352,7 +374,17 @@ exports.gameFriend=(req,res)=>{
         participante2: req.body.nombreAmigo,
         ganador: undefined,
         estado: "pendiente",
-        tipo: "amistoso"
+        tipo: "amistoso",
+        barcos1:
+        {
+            colocados: false,
+            barcos:[]
+        },
+        barcos2:
+        {
+            colocados: false,
+            barcos:[]
+        }
     });
     //Añadimos la partida a la base de datos
     partida.save(function (err) {
@@ -411,20 +443,20 @@ exports.gameInProgress=(req,res)=>{
         peticiones = result.map(function(item){
             if(req.body.nombreUsuario==item.participante1){
                 contrincante=item.participante2;
-                if(item.turno=="TurnoJ1"){
+                if(item.subestado=="turnoJ1"){
                     turno= "TuTurno";
                 }else{
                     turno= "TurnoRival";
                 }
             }else{
                 contrincante=item.participante1;
-                if(item.turno=="TurnoJ2"){
+                if(item.subestado=="turnoJ2"){
                     turno= "TuTurno";
                 }else{
                     turno= "TurnoRival";
                 }
             }
-            if(item.turno!="TurnoJ2" && item.turno=="TurnoJ1"){
+            if(item.subestado=="colocandoBarcos"){
                 turno= "ColocandoBarcos";
             }
             return {
@@ -479,7 +511,18 @@ exports.gameAccept=(req,res)=>{
         participante2: req.body.nombreUsuario
     },
     {
-        estado:"enCurso"
+        estado:"enCurso",
+        subestado: "colocandoBarcos",
+        barcos1:
+        {
+            colocados: false,
+            barcos:[]
+        },
+        barcos2:
+        {
+            colocados: false,
+            barcos:[]
+        }
     },
     {new: true},
     (err,partida) =>{
@@ -516,7 +559,18 @@ exports.blindMatch=(req,res)=>{
         ,
         {
             participante2: req.body.nombreUsuario,
-            estado: "enCurso"
+            estado: "enCurso",
+            subestado: "colocandoBarcos",
+            barcos1:
+            {
+                colocados: false,
+                barcos:[]
+            },
+            barcos2:
+            {
+                colocados: false,
+                barcos:[]
+            }
         },
         {new: true},
         (err,partida)=>{
@@ -525,7 +579,17 @@ exports.blindMatch=(req,res)=>{
             const nuevaPartida= new Partida ({
                 participante1: req.body.nombreUsuario,                    
                 estado: "pendiente",
-                tipo: "ciegas"
+                tipo: "ciegas",
+                barcos1:
+                {
+                    colocados: false,
+                    barcos:[]
+                },
+                barcos2:
+                {
+                    colocados: false,
+                    barcos:[]
+                }
             });
             //Añadimos la partida a la base de datos
             nuevaPartida.save(function (err) {
@@ -624,3 +688,316 @@ exports.profile=(req,res)=>{
             });
     });
 }
+
+
+function comprobarCoordenada(fila,columna,map){
+    //comprueba si las coordenadas estan dentro de los limites del tablero
+    if(fila>=10 || fila<0 || columna>=10 || columna<0){
+        return false;
+    }
+    Xs=[0,1,-1,0,0,-1,-1,1,1];
+    Ys=[0,0,0,1,-1,-1,1,1,-1];
+    //mira si hay barcos en los alrededores 
+    for(j=0;j<9;j++){
+        col=columna+Xs[j];
+        fil=fila+Ys[j];
+        if(fil<10 && fil>=0 && col<10 & col>=0){
+            key=fil*10+col;
+            if(map.get(key)==true){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function colocarBarco(barco,longitud,mapa,barcos,tipobarco){
+    nuevobarco={  
+        tipo: tipobarco,
+        estado:"sano",
+        restantes: longitud,
+        coordenadas: []
+    }
+    fila=barco.posicion.fila;
+    columna=barco.posicion.columna;
+    if(barco.direccion=="horizontal"){ 
+        for(i=0;i<longitud;i++){
+            if(!comprobarCoordenada(fila,columna,mapa)){
+                return false;
+            }else{
+                nuevobarco.coordenadas.push(
+                    {
+                        fila:fila,
+                        columna:columna
+                    }
+                )
+            }
+            columna++;
+        }
+    }else{
+        for(i=0;i<longitud;i++){
+            if(!comprobarCoordenada(fila,columna,mapa)){
+                return false;
+            }else{
+                nuevobarco.coordenadas.push(
+                    {
+                        fila:fila,
+                        columna:columna
+                    }
+                )
+            }
+            fila++;
+        }
+        
+    }
+    nuevobarco.coordenadas.forEach(element =>
+        mapa.set(element.fila*10+element.columna,true)
+    );
+    barcos.push(nuevobarco);
+    return true;
+}
+
+exports.colocarBarcos=(req,res)=>{
+    Partida.findById(
+    { 
+        _id: req.body.gameid
+    },
+    (err,partida) =>{
+    if (err) return res.status(500).send('Server error!');
+    if(!partida) return res.status(500).send('No existe una partida con esa id');
+    if(partida.participante1!=req.body.nombreUsuario && partida.participante2!=req.body.nombreUsuario) return res.status(500).send('No perteneces a esta partida');
+    if(partida.estado!="enCurso"||partida.subestado!="colocandoBarcos") return res.status(500).send('No se pueden colocar los barcos ahora');
+    if(partida.participante1==req.body.nombreUsuario&&partida.barcos1.colocados==true) return res.status(500).send('Ya habías colocado tus barcos');
+    if(partida.participante2==req.body.nombreUsuario&&partida.barcos2.colocados==true) return res.status(500).send('Ya habías colocado tus barcos');
+    
+    const barcosReq={
+        portaaviones:req.body.portaaviones,
+        buque:req.body.buque,
+        submarino1:req.body.submarino1,
+        submarino2:req.body.submarino2,
+        crucero:req.body.crucero
+    }
+    correcto=true;
+    colocados= new Map();
+    barcos=[];
+    
+    
+    correcto=correcto&&colocarBarco(barcosReq.portaaviones,5,colocados,barcos,"portaaviones");
+    correcto=correcto&&colocarBarco(barcosReq.buque,4,colocados,barcos,"buque");
+    correcto=correcto&&colocarBarco(barcosReq.submarino1,3,colocados,barcos,"submarino1");
+    correcto=correcto&&colocarBarco(barcosReq.submarino2,3,colocados,barcos,"submarino2");
+    correcto=correcto&&colocarBarco(barcosReq.crucero,2,colocados,barcos,"crucero");
+
+    if(!correcto){
+        return res.status(500).send('Barcos mal colocados, no cumlen alguna restricción');
+    }
+    barcosinsert={
+        colocados:true,
+        barcos:barcos
+    }
+    if(partida.participante1==req.body.nombreUsuario){
+        partida.barcos1=barcosinsert;
+    }else{
+        partida.barcos2=barcosinsert;
+    }
+
+    if(partida.barcos1.colocados==true&&partida.barcos2.colocados==true){
+        partida.tablero1=[];
+        partida.tablero2=[];
+        partida.subestado="turnoJ1";
+    }
+    Partida.findByIdAndUpdate( 
+    { 
+        _id: req.body.gameid
+    },
+    partida
+    ,
+    (err,partida2) =>{
+    if (err) return res.status(500).send('Server error!');  
+        return res.send(barcos);
+    })});
+}
+
+
+exports.disparo=(req,res)=>{
+    Partida.findById(
+    {
+        _id: req.body.gameid
+    },(err,partida) =>{
+        if (err) return res.status(500).send('Server error!');
+        if(!partida) return res.status(500).send('No existe una partida con esa id');
+        if(!partida) return res.status(500).send('No existe una partida con esa id');
+        if(partida.participante1!=req.body.nombreUsuario && partida.participante2!=req.body.nombreUsuario) return res.status(500).send('No perteneces a esta partida');
+        if(partida.estado!="enCurso"||partida.subestado=="colocandoBarcos") return res.status(500).send('Todavía falta algun jugador por colocar sus barcos');
+        if(partida.participante1==req.body.nombreUsuario) {
+            if(partida.subestado!="turnoJ1") return res.status(500).send('No es tu turno');
+            disparo={
+                fila: req.body.fila,
+                columna:req.body.columna
+            }
+            if(disparo.fila>=10 || disparo.fila<0 || disparo.columna>=10 || disparo.columna<0) return res.status(500).send('Disparo fuera de los límites');
+            if(partida.tablero2.find(coordenada=>(coordenada.casilla.fila==disparo.fila)
+            &&(coordenada.casilla.columna==disparo.columna))) return res.status(500).send('Ya has disparado a esa ubicación');
+            partida.subestado="turnoJ1"
+            //busca un barco del J2 que tenga un barco que tenga una coordenada que coincida con el disparo
+            tocado=false;
+            for (var i in partida.barcos2.barcos) {
+                console.log("Hey",partida.barcos2.barcos[i]);
+                if (partida.barcos2.barcos[i].coordenadas.find(coordenada=>(coordenada.fila==disparo.fila)
+                    &&(coordenada.columna==disparo.columna))){
+                    //Ha tocado a un barco
+                    tocado=true;
+                    console.log("TOCAAAADO");
+                    partida.barcos2.barcos[i].restantes=partida.barcos2.barcos[i].restantes-1;
+                    hundido=false;
+                    if(partida.barcos2.barcos[i].restantes>0){
+                        partida.barcos2.barcos[i].estado="tocado";
+                    }else{
+                        partida.barcos2.barcos[i].estado="hundido";
+                        hundido=true;
+                    }
+                    partida.tablero2.push({
+                        casilla: {
+                            fila: disparo.fila,
+                            columna: disparo.columna,
+                            estado: "acierto"
+                        }}
+                    );
+                    if(hundido){
+                        //has hundido un barco
+                        barco  = partida.barcos2.barcos.find(barco=> barco.estado!="hundido");
+                        if(!barco){
+                            //no quedan barcos en pie "HAS GANADO"
+                            partida.ganador=req.body.nombreUsuario;
+                            partida.estado="finalizada";
+                            respuesta={
+                                disparo:"hundido",
+                                barco:partida.barcos2.barcos[i],
+                                fin:true                                
+                            }
+                        }else{
+                            //has hundido un barco, pero siguen barcos en pie
+                            respuesta={
+                                disparo:"hundido",
+                                barco:partida.barcos2.barcos[i],
+                                fin:false                               
+                            }
+                        }
+                    }else{
+                        //has tocado un barco, pero no lo has hundido
+                        respuesta={
+                            disparo:"tocado",
+                            fin:false                               
+                        }
+                    }
+                }
+            }
+            //no ha tocado un barco
+            if(!tocado){
+                partida.tablero2.push({
+                    casilla: {
+                        fila: disparo.fila,
+                        columna: disparo.columna,
+                        estado: "fallo"
+                    }
+                });
+                respuesta={disparo:"fallo",fin:false};
+            }
+            Partida.findByIdAndUpdate( 
+                { 
+                    _id: req.body.gameid
+                },
+                partida
+                ,
+                (err,partida2) =>{
+                    if (err) return res.status(500).send('Server error!');  
+                    return res.send(respuesta);
+                });
+            
+        }else if(partida.participante2==req.body.nombreUsuario) { 
+            if(partida.subestado!="turnoJ2") return res.status(500).send('No es tu turno');
+            disparo={
+                fila: req.body.fila,
+                columna:req.body.columna
+            }
+            if(disparo.fila>=10 || disparo.fila<0 || disparo.columna>=10 || disparo.columna<0) return res.status(500).send('Disparo fuera de los límites');
+            if(partida.tablero1.find(coordenada=>(coordenada.casilla.fila==disparo.fila)
+            &&(coordenada.casilla.columna==disparo.columna))) return res.status(500).send('Ya has disparado a esa ubicación');
+            partida.subestado="turnoJ1"
+            //busca un barco del J2 que tenga un barco que tenga una coordenada que coincida con el disparo
+            tocado=false;
+            for (var i in partida.barcos1.barcos) {
+                if (partida.barcos1.barcos[i].coordenadas.find(coordenada=>(coordenada.fila==disparo.fila)
+                    &&(coordenada.columna==disparo.columna))){
+                    //Ha tocado a un barco
+                    tocado=true;
+                    console.log("TOCAAAADO");
+                    partida.barcos1.barcos[i].restantes=partida.barcos1.barcos[i].restantes-1;
+                    hundido=false;
+                    if(partida.barcos1.barcos[i].restantes>0){
+                        partida.barcos1.barcos[i].estado="tocado";
+                    }else{
+                        partida.barcos1.barcos[i].estado="hundido";
+                        hundido=true;
+                    }
+                    partida.tablero1.push({
+                        casilla: {
+                            fila: disparo.fila,
+                            columna: disparo.columna,
+                            estado: "acierto"
+                        }}
+                    );
+                    if(hundido){
+                        //has hundido un barco
+                        barco  = partida.barcos1.barcos.find(barco=> barco.estado!="hundido");
+                        if(!barco){
+                            //no quedan barcos en pie "HAS GANADO"
+                            partida.ganador=req.body.nombreUsuario;
+                            partida.estado="finalizada";
+                            respuesta={
+                                disparo:"hundido",
+                                barco:partida.barcos1.barcos[i],
+                                fin:true                                
+                            }
+                        }else{
+                            //has hundido un barco, pero siguen barcos en pie
+                            respuesta={
+                                disparo:"hundido",
+                                barco:partida.barcos1.barcos[i],
+                                fin:false                               
+                            }
+                        }
+                    }else{
+                        //has tocado un barco, pero no lo has hundido
+                        respuesta={
+                            disparo:"tocado",
+                            fin:false                               
+                        }
+                    }
+                }
+            }
+            //no ha tocado un barco
+            if(!tocado){
+                partida.tablero1.push({
+                    casilla: {
+                        fila: disparo.fila,
+                        columna: disparo.columna,
+                        estado: "fallo"
+                    }
+                });
+                respuesta={disparo:"fallo",fin:false};
+            }
+            Partida.findByIdAndUpdate( 
+                { 
+                    _id: req.body.gameid
+                },
+                partida
+                ,
+                (err,partida2) =>{
+                    if (err) return res.status(500).send('Server error!');  
+                    return res.send(respuesta);
+                });
+        }
+    })
+};
+

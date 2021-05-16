@@ -17,27 +17,67 @@ const partidaSchema = new Schema ({
     estado:{//VALORES:"pendiente","enCurso","finalizada"
         type: String
     },
+    subestado:{//VALORES:"colocandoBarcos","turnoJ1","turnoJ2"
+        type: String
+    },
     tipo:{//VALORES:"ciegas","amistoso","ia","torneo"
         type: String
     },
-    barcos:[{
-        propietario: {
-            type: Schema.Types.ObjectId, 
-            ref: 'Usuario'
+    barcos1:
+    {
+        colocados:{
+            type: Boolean
         },
-        tipo: {
-            type: String
-        },
-        coordenadas: [{
-            fila: {
-                type: Number
+        barcos:
+        [{  
+            tipo: {
+            //VALORES:"portaaviones"(5 casillas),"buque"(4),"submarino1"(3),"submarino2"(3),"crucero"(2)
+                type: String
             },
-            columna: {
-                type: Number
-            }
+            estado:{//VALORES:"sano","tocado","hundido"
+                type: String
+            },
+            restantes:{//casillas restantes sin tocar del barco
+                type:Number
+            },
+            coordenadas: [{
+                fila: {
+                    type: Number
+                },
+                columna: {
+                    type: Number
+                }
+            }]
         }]
-    }],
-    tablero:[{
+    },
+    barcos2:
+    {
+        colocados:{
+            type: Boolean
+        },
+        barcos:
+        [{  
+            tipo: {
+            //VALORES:"portaaviones"(5 casillas),"buque"(4),"submarino1"(3),"submarino2"(3),"crucero"(2)
+                type: String
+            },
+            estado:{//VALORES:"sano","tocado","hundido"
+                type: String
+            },
+            restantes:{
+                type:Number
+            },
+            coordenadas: [{
+                fila: {
+                    type: Number
+                },
+                columna: {
+                    type: Number
+                }
+            }]
+        }]
+    },
+    tablero1:[{//disparos sobre el tablero del J1
         casilla: {
             fila: {
                 type: Number
@@ -45,7 +85,21 @@ const partidaSchema = new Schema ({
             columna: {
                 type: Number
             },
-            //disparada
+            //VALORES:"fallo","acierto"
+            estado: {
+                type: String
+            }
+        }
+    }],
+    tablero2:[{//disparos sobre el tablero del J2
+        casilla: {
+            fila: {
+                type: Number
+            },
+            columna: {
+                type: Number
+            },
+            //VALORES:"fallo","acierto"
             estado: {
                 type: String
             }
