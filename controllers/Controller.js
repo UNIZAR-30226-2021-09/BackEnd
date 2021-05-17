@@ -462,7 +462,6 @@ exports.gameInProgress=(req,res)=>{
                 }else{
                     turno= "ColocandoBarcos";
                 }
-                
             }
             return {
                 contrincante: contrincante,
@@ -807,11 +806,19 @@ exports.colocarBarcos=(req,res)=>{
         partida.barcos2=barcosinsert;
     }
 
+    //
     if(partida.barcos1.colocados==true&&partida.barcos2.colocados==true){
-        partida.tablero1=[];
-        partida.tablero2=[];
-        partida.subestado="turnoJ1";
+        if(req.body.nombreUsuario==partida.participante1){
+            turno="TuTurno";
+        }else{
+            turno="TurnoRival";
+        }
+        
+    }else{
+        turno="ColocarBarcosRival"
     }
+
+
     Partida.findByIdAndUpdate( 
     { 
         _id: req.body.gameid
@@ -820,7 +827,7 @@ exports.colocarBarcos=(req,res)=>{
     ,
     (err,partida2) =>{
     if (err) return res.status(500).send('Server error!');  
-        return res.send(barcos);
+        return res.send({barcos:barcos,turno:turno});
     })});
 }
 
