@@ -457,7 +457,12 @@ exports.gameInProgress=(req,res)=>{
                 }
             }
             if(item.subestado=="colocandoBarcos"){
-                turno= "ColocandoBarcos";
+                if (req.body.nombreUsuario==item.participante1&&item.barcos1.colocados){
+                    turno= "ColocandoBarcosRival";
+                }else{
+                    turno= "ColocandoBarcos";
+                }
+                
             }
             return {
                 contrincante: contrincante,
@@ -879,9 +884,9 @@ exports.disparo=(req,res)=>{
                             if(partida.tipo!="ciegas") puntos=0;
                             disparosRealizados=partida.tablero2.length;
                             //El número de barcos destruidos
-                            barcosDestuidos = 0;
+                            barcosDestruidos = 0;
                             for(var i = 0; i < partida.barcos2.barcos.length; ++i){
-                                if(partida.barcos2.barcos[i].estado =="hundido" ) barcosDestuidos++;
+                                if(partida.barcos2.barcos[i].estado =="hundido" ) barcosDestruidos++;
                             }
                             //El número de disparos acertados
                             disparosAcertados=0;
@@ -896,7 +901,7 @@ exports.disparo=(req,res)=>{
                                     ganador:ganador,
                                     puntos:puntos,
                                     disparosRealizados:disparosRealizados,
-                                    barcosDestuidos:barcosDestuidos,
+                                    barcosDestruidos:barcosDestruidos,
                                     disparosAcertados:disparosAcertados
                                 }                              
                             }
@@ -986,9 +991,9 @@ exports.disparo=(req,res)=>{
                             if(partida.tipo!="ciegas") puntos=0;
                             disparosRealizados=partida.tablero1.length;
                             //El número de barcos destruidos
-                            barcosDestuidos = 0;
+                            barcosDestruidos = 0;
                             for(var i = 0; i < partida.barcos1.barcos.length; ++i){
-                                if(partida.barcos1.barcos[i].estado =="hundido" ) barcosDestuidos++;
+                                if(partida.barcos1.barcos[i].estado =="hundido" ) barcosDestruidos++;
                             }
                             //El número de disparos acertados
                             disparosAcertados=0;
@@ -1003,7 +1008,7 @@ exports.disparo=(req,res)=>{
                                     ganador:ganador,
                                     puntos:puntos,
                                     disparosRealizados:disparosRealizados,
-                                    barcosDestuidos:barcosDestuidos,
+                                    barcosDestruidos:barcosDestruidos,
                                     disparosAcertados:disparosAcertados
                                 }                              
                             }
@@ -1104,9 +1109,9 @@ exports.infoPartida=(req,res)=>{
         if(partida.tipo!="ciegas") puntos=0;
         disparosRealizados=partida.tablero2.length;
         //El número de barcos destruidos
-        barcosDestuidos = 0;
+        barcosDestruidos = 0;
         for(var i = 0; i < partida.barcos2.barcos.length; ++i){
-            if(partida.barcos2.barcos[i].estado =="hundido" ) barcosDestuidos++;
+            if(partida.barcos2.barcos[i].estado =="hundido" ) barcosDestruidos++;
         }
         //El número de disparos acertados
         disparosAcertados=0;
@@ -1118,7 +1123,7 @@ exports.infoPartida=(req,res)=>{
                 ganador:ganador,
                 puntos:puntos,
                 disparosRealizados:disparosRealizados,
-                barcosDestuidos:barcosDestuidos,
+                barcosDestruidos:barcosDestruidos,
                 disparosAcertados:disparosAcertados
             }                              
         }
@@ -1135,9 +1140,9 @@ exports.infoPartida=(req,res)=>{
        
         disparosRealizados=partida.tablero1.length;
         //El número de barcos destruidos
-        barcosDestuidos = 0;
+        barcosDestruidos = 0;
         for(var i = 0; i < partida.barcos1.barcos.length; ++i){
-            if(partida.barcos1.barcos[i].estado =="hundido" ) barcosDestuidos++;
+            if(partida.barcos1.barcos[i].estado =="hundido" ) barcosDestruidos++;
         }
         //El número de disparos acertados
         disparosAcertados=0;
@@ -1149,7 +1154,7 @@ exports.infoPartida=(req,res)=>{
                 ganador:ganador,
                 puntos:puntos,
                 disparosRealizados:disparosRealizados,
-                barcosDestuidos:barcosDestuidos,
+                barcosDestruidos:barcosDestruidos,
                 disparosAcertados:disparosAcertados
             }                              
         }
