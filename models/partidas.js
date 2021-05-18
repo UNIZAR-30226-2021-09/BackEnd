@@ -107,13 +107,11 @@ const partidaSchema = new Schema ({
     }],
     //torneo al que pertenece si es parte de algún torneo
     torneo: {
-        propietario: {
-            type: Schema.Types.ObjectId, 
-            ref: 'Torneo'
-        },
-        eliminatoria: {
-            type: Number
-        }
+        type: Schema.Types.ObjectId, 
+        ref: 'Torneo'
+    },
+    eliminatoria: {
+        type: Number
     }
 });
 

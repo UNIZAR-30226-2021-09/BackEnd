@@ -1060,6 +1060,53 @@ exports.disparo=(req,res)=>{
                     if(err) return res.status(500).send('Server error!');
                     if(!myuser)return res.status(500).send({mensaje: 'Error al actualizar los datos del usuario' });
                     
+                    //Si la partida es un torneo compruebas si ya existe la siguiente partida. Si no, la creas
+                    if(partida.tipo == "torneo"){
+                        if(partida.torneo.eliminatoria == 1){
+                            Partida.find(
+                                {
+                                    torneo:partida.torneo,
+                                    eliminatoria: 2
+                                },
+                                (err,result)=>{
+                                    if (err) return res.status(500).send('Server Error');
+                                    if(!result){
+                                        //los otros dos contendientes no han terminado, creamos la partida
+                                        const final= new Partida ({
+                                            participante1: req.body.nombreUsuario,
+                                            ganador: undefined,
+                                            estado: "enCurso",
+                                            subestado: "colocandoBarcos",
+                                            tipo: "torneo",
+                                            barcos1:
+                                            {
+                                                colocados: false,
+                                                barcos:[]
+                                            },
+                                            barcos2:
+                                            {
+                                                colocados: false,
+                                                barcos:[]
+                                            },
+                                            torneo: torneo,
+                                            eliminatoria: 2,
+                                        });
+
+                                        final.save(function (err) {
+                                            if (err) return res.status(500).send('Error al guardar final de torneo');                    
+                                        });
+                                    }
+                                    else{
+                                        final.participante2 = req.body.nombreUsuario;
+                                        final.save(function (err) {
+                                            if (err) return res.status(500).send('Error al actualiza final de torneo');                    
+                                        });
+                                    }
+                                }
+                            )
+                        }
+                    }
+
                     //Actualizamos los datos del rival
                     if(partida.participante1==req.body.nombreUsuario){
                         rival=partida.participante2;
@@ -1080,7 +1127,8 @@ exports.disparo=(req,res)=>{
                     
                         return res.send(respuesta);
             
-                    });});
+                    });
+                });
                 }
             });
         }
