@@ -7,6 +7,9 @@ const Request = mongoose.model('Requests',requestSchema);
 const partidaSchema = require('../models/partidas');
 const Partida = mongoose.model('Partidas',partidaSchema);
 
+const torneoSchema = require('../models/torneo');
+const Torneo = mongoose.model('Torneo',torneoSchema);
+
 const jwt=require('jsonwebtoken');
 const bcrypt=require('bcryptjs');
 const SECRET_KEY='secretkey123456';
@@ -790,7 +793,7 @@ exports.colocarBarcos=(req,res)=>{
     correcto=correcto&&colocarBarco(barcosReq.crucero,2,colocados,barcos,"crucero");
 
     if(!correcto){
-        return res.status(500).send('Barcos mal colocados, no cumlen alguna restricción');
+        return res.status(500).send('Barcos mal colocados, no cumplen alguna restricción');
     }
     barcosinsert={
         colocados:true,
@@ -1195,4 +1198,109 @@ exports.cogerTablero=(req,res)=>{
     }
     return res.send(respuesta);
     });
+}
+
+exports.crearTorneo=(req,res)=>{
+    User.find(
+        {
+            nombreUsuario:req.body.participante1,
+            amigos:req.body.participante2
+        },
+        (err,result)=>{
+        if (err) return res.status(500).send('Server Error');
+        if(!result){
+            return res.status(500).send(
+            `El usuario ${req.body.nombreAmigo} no está en tu lista de amigos`)
+        }
+        User.find(
+            {
+                nombreUsuario:req.body.participante1,
+                amigos:req.body.participante3
+            },
+            (err,result)=>{
+            if (err) return res.status(500).send('Server Error');
+            if(!result){
+                return res.status(500).send(
+                `El usuario ${req.body.nombreAmigo} no está en tu lista de amigos`)
+            }
+            User.find(
+                {
+                    nombreUsuario:req.body.participante1,
+                    amigos:req.body.participante4
+                },
+                (err,result)=>{
+                if (err) return res.status(500).send('Server Error');
+                if(!result){
+                    return res.status(500).send(
+                    `El usuario ${req.body.nombreAmigo} no está en tu lista de amigos`)
+                }
+        
+                //Se crean el torneo y las partidas
+                const torneo= new Torneo ({
+                    
+                });
+                
+                const partida1= new Partida ({
+                    participante1: req.body.nombreUsuario,
+                    participante2: req.body.participante2,
+                    ganador: undefined,
+                    estado: "enCurso",
+                    subestado: "colocandoBarcos",
+                    tipo: "torneo",
+                    barcos1:
+                    {
+                        colocados: false,
+                        barcos:[]
+                    },
+                    barcos2:
+                    {
+                        colocados: false,
+                        barcos:[]
+                    },
+                    torneo: torneo,
+                    eliminatoria: 1,
+                });
+
+                const partida2= new Partida ({
+                    participante1: req.body.participante3,
+                    participante2: req.body.participante4,
+                    ganador: undefined,
+                    estado: "enCurso",
+                    subestado: "colocandoBarcos",
+                    tipo: "torneo",
+                    barcos1:
+                    {
+                        colocados: false,
+                        barcos:[]
+                    },
+                    barcos2:
+                    {
+                        colocados: false,
+                        barcos:[]
+                    },
+                    torneo: torneo,
+                    eliminatoria: 1,
+                });
+
+                torneo.partidas.push(partida1);
+                torneo.partidas.push(partida2);
+
+                //Añadimos torneo y partida a la base de datos
+                torneo.save(function (err) {
+                    if (err) return res.status(500).send('Error al guardar partida1 de torneo');                    
+                });
+                partida1.save(function (err) {
+                    if (err) return res.status(500).send('Error al guardar partida1 de torneo');                    
+                });
+                partida2.save(function (err) {
+                    if (err) return res.status(500).send('Error al guardar partida2 de torneo');
+                    //devolvemos Mensaje
+                    respuesta={
+                        mensaje:'El torneo ha comenzado. En tu lista de partidas encontrarás la partida que te toca jugar'
+                    }
+                    return res.send(respuesta);
+                });
+            })
+        })
+    })     
 }
