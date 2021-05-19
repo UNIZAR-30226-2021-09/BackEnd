@@ -893,13 +893,13 @@ exports.disparo=(req,res)=>{
                             disparosRealizados=partida.tablero2.length;
                             //El número de barcos destruidos
                             barcosDestruidos = 0;
-                            for(var i = 0; i < partida.barcos2.barcos.length; ++i){
-                                if(partida.barcos2.barcos[i].estado =="hundido" ) barcosDestruidos++;
+                            for(var k = 0; k < partida.barcos2.barcos.length; ++k){
+                                if(partida.barcos2.barcos[k].estado =="hundido" ) barcosDestruidos++;
                             }
                             //El número de disparos acertados
                             disparosAcertados=0;
-                            for(var i = 0; i < partida.tablero2.length; ++i){
-                                if(partida.tablero2[i].casilla.estado =="acierto" ) disparosAcertados++;
+                            for(var j = 0; j < partida.tablero2.length; ++j){
+                                if(partida.tablero2[j].casilla.estado =="acierto" ) disparosAcertados++;
                             }
                             respuesta={
                                 disparo:"hundido",
@@ -1000,13 +1000,13 @@ exports.disparo=(req,res)=>{
                             disparosRealizados=partida.tablero1.length;
                             //El número de barcos destruidos
                             barcosDestruidos = 0;
-                            for(var i = 0; i < partida.barcos1.barcos.length; ++i){
-                                if(partida.barcos1.barcos[i].estado =="hundido" ) barcosDestruidos++;
+                            for(var k = 0; k < partida.barcos1.barcos.length; ++k){
+                                if(partida.barcos1.barcos[k].estado =="hundido" ) barcosDestruidos++;
                             }
                             //El número de disparos acertados
                             disparosAcertados=0;
-                            for(var i = 0; i < partida.tablero1.length; ++i){
-                                if(partida.tablero1[i].casilla.estado =="acierto" ) disparosAcertados++;
+                            for(var j = 0; j < partida.tablero1.length; ++j){
+                                if(partida.tablero1[j].casilla.estado =="acierto" ) disparosAcertados++;
                             }
                             respuesta={
                                 disparo:"hundido",
