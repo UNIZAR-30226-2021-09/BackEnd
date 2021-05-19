@@ -460,7 +460,13 @@ exports.gameInProgress=(req,res)=>{
                 }
             }
             if(item.subestado=="colocandoBarcos"){
-                turno= "ColocandoBarcos";
+                if (req.body.nombreUsuario==item.participante1&&item.barcos1.colocados){
+                    turno= "ColocandoBarcosRival";
+                }else if(req.body.nombreUsuario==item.participante2&&item.barcos2.colocados){
+                    turno= "ColocandoBarcosRival";
+                }else{
+                    turno= "ColocandoBarcos";
+                }
             }
             return {
                 contrincante: contrincante,
@@ -785,7 +791,6 @@ exports.colocarBarcos=(req,res)=>{
     colocados= new Map();
     barcos=[];
     
-    
     correcto=correcto&&colocarBarco(barcosReq.portaaviones,5,colocados,barcos,"portaaviones");
     correcto=correcto&&colocarBarco(barcosReq.buque,4,colocados,barcos,"buque");
     correcto=correcto&&colocarBarco(barcosReq.submarino1,3,colocados,barcos,"submarino1");
@@ -805,11 +810,20 @@ exports.colocarBarcos=(req,res)=>{
         partida.barcos2=barcosinsert;
     }
 
+    //
     if(partida.barcos1.colocados==true&&partida.barcos2.colocados==true){
-        partida.tablero1=[];
-        partida.tablero2=[];
-        partida.subestado="turnoJ1";
+        partida.subestado="turnoJ1"
+        if(req.body.nombreUsuario==partida.participante1){
+            turno="TuTurno";
+        }else{
+            turno="TurnoRival";
+        }
+        
+    }else{
+        turno="ColocarBarcosRival";
     }
+
+
     Partida.findByIdAndUpdate( 
     { 
         _id: req.body.gameid
@@ -818,7 +832,7 @@ exports.colocarBarcos=(req,res)=>{
     ,
     (err,partida2) =>{
     if (err) return res.status(500).send('Server error!');  
-        return res.send(barcos);
+        return res.send({barcos:barcos,turno:turno});
     })});
 }
 
@@ -842,17 +856,16 @@ exports.disparo=(req,res)=>{
             if(disparo.fila>=10 || disparo.fila<0 || disparo.columna>=10 || disparo.columna<0) return res.status(500).send('Disparo fuera de los límites');
             if(partida.tablero2.find(coordenada=>(coordenada.casilla.fila==disparo.fila)
             &&(coordenada.casilla.columna==disparo.columna))) return res.status(500).send('Ya has disparado a esa ubicación');
-            partida.subestado="turnoJ1"
+            partida.subestado="turnoJ2"
             //busca un barco del J2 que tenga un barco que tenga una coordenada que coincida con el disparo
             tocado=false;
             fin=false;
             for (var i in partida.barcos2.barcos) {
-                console.log("Hey",partida.barcos2.barcos[i]);
                 if (partida.barcos2.barcos[i].coordenadas.find(coordenada=>(coordenada.fila==disparo.fila)
                     &&(coordenada.columna==disparo.columna))){
                     //Ha tocado a un barco
                     tocado=true;
-                    console.log("TOCAAAADO");
+                    partida.subestado="turnoJ1"
                     partida.barcos2.barcos[i].restantes=partida.barcos2.barcos[i].restantes-1;
                     hundido=false;
                     if(partida.barcos2.barcos[i].restantes>0){
@@ -882,14 +895,14 @@ exports.disparo=(req,res)=>{
                             if(partida.tipo!="ciegas") puntos=0;
                             disparosRealizados=partida.tablero2.length;
                             //El número de barcos destruidos
-                            barcosDestuidos = 0;
-                            for(var i = 0; i < partida.barcos2.barcos.length; ++i){
-                                if(partida.barcos2.barcos[i].estado =="hundido" ) barcosDestuidos++;
+                            barcosDestruidos = 0;
+                            for(var k = 0; k < partida.barcos2.barcos.length; ++k){
+                                if(partida.barcos2.barcos[k].estado =="hundido" ) barcosDestruidos++;
                             }
                             //El número de disparos acertados
                             disparosAcertados=0;
-                            for(var i = 0; i < partida.tablero2.length; ++i){
-                                if(partida.tablero2[i].casilla.estado =="acierto" ) disparosAcertados++;
+                            for(var j = 0; j < partida.tablero2.length; ++j){
+                                if(partida.tablero2[j].casilla.estado =="acierto" ) disparosAcertados++;
                             }
                             respuesta={
                                 disparo:"hundido",
@@ -899,7 +912,7 @@ exports.disparo=(req,res)=>{
                                     ganador:ganador,
                                     puntos:puntos,
                                     disparosRealizados:disparosRealizados,
-                                    barcosDestuidos:barcosDestuidos,
+                                    barcosDestruidos:barcosDestruidos,
                                     disparosAcertados:disparosAcertados
                                 }                              
                             }
@@ -959,7 +972,7 @@ exports.disparo=(req,res)=>{
                     &&(coordenada.columna==disparo.columna))){
                     //Ha tocado a un barco
                     tocado=true;
-                    console.log("TOCAAAADO");
+                    partida.subestado="turnoJ2"
                     partida.barcos1.barcos[i].restantes=partida.barcos1.barcos[i].restantes-1;
                     hundido=false;
                     if(partida.barcos1.barcos[i].restantes>0){
@@ -989,14 +1002,14 @@ exports.disparo=(req,res)=>{
                             if(partida.tipo!="ciegas") puntos=0;
                             disparosRealizados=partida.tablero1.length;
                             //El número de barcos destruidos
-                            barcosDestuidos = 0;
-                            for(var i = 0; i < partida.barcos1.barcos.length; ++i){
-                                if(partida.barcos1.barcos[i].estado =="hundido" ) barcosDestuidos++;
+                            barcosDestruidos = 0;
+                            for(var k = 0; k < partida.barcos1.barcos.length; ++k){
+                                if(partida.barcos1.barcos[k].estado =="hundido" ) barcosDestruidos++;
                             }
                             //El número de disparos acertados
                             disparosAcertados=0;
-                            for(var i = 0; i < partida.tablero1.length; ++i){
-                                if(partida.tablero1[i].casilla.estado =="acierto" ) disparosAcertados++;
+                            for(var j = 0; j < partida.tablero1.length; ++j){
+                                if(partida.tablero1[j].casilla.estado =="acierto" ) disparosAcertados++;
                             }
                             respuesta={
                                 disparo:"hundido",
@@ -1006,7 +1019,7 @@ exports.disparo=(req,res)=>{
                                     ganador:ganador,
                                     puntos:puntos,
                                     disparosRealizados:disparosRealizados,
-                                    barcosDestuidos:barcosDestuidos,
+                                    barcosDestruidos:barcosDestruidos,
                                     disparosAcertados:disparosAcertados
                                 }                              
                             }
@@ -1144,7 +1157,7 @@ exports.infoPartida=(req,res)=>{
     if(!partida) return res.status(500).send('No existe una partida con esa id');
     if(partida.participante1!=req.body.nombreUsuario && partida.participante2!=req.body.nombreUsuario) return res.status(500).send('No perteneces a esta partida');
     if(partida.participante1==req.body.nombreUsuario){
-        console.log(partida);
+        
         //Estadisticas de partida del J1
         ganador=(partida.ganador==req.body.nombreUsuario);
         if(ganador){
@@ -1155,9 +1168,9 @@ exports.infoPartida=(req,res)=>{
         if(partida.tipo!="ciegas") puntos=0;
         disparosRealizados=partida.tablero2.length;
         //El número de barcos destruidos
-        barcosDestuidos = 0;
+        barcosDestruidos = 0;
         for(var i = 0; i < partida.barcos2.barcos.length; ++i){
-            if(partida.barcos2.barcos[i].estado =="hundido" ) barcosDestuidos++;
+            if(partida.barcos2.barcos[i].estado =="hundido" ) barcosDestruidos++;
         }
         //El número de disparos acertados
         disparosAcertados=0;
@@ -1169,7 +1182,7 @@ exports.infoPartida=(req,res)=>{
                 ganador:ganador,
                 puntos:puntos,
                 disparosRealizados:disparosRealizados,
-                barcosDestuidos:barcosDestuidos,
+                barcosDestruidos:barcosDestruidos,
                 disparosAcertados:disparosAcertados
             }                              
         }
@@ -1186,9 +1199,9 @@ exports.infoPartida=(req,res)=>{
        
         disparosRealizados=partida.tablero1.length;
         //El número de barcos destruidos
-        barcosDestuidos = 0;
+        barcosDestruidos = 0;
         for(var i = 0; i < partida.barcos1.barcos.length; ++i){
-            if(partida.barcos1.barcos[i].estado =="hundido" ) barcosDestuidos++;
+            if(partida.barcos1.barcos[i].estado =="hundido" ) barcosDestruidos++;
         }
         //El número de disparos acertados
         disparosAcertados=0;
@@ -1200,7 +1213,7 @@ exports.infoPartida=(req,res)=>{
                 ganador:ganador,
                 puntos:puntos,
                 disparosRealizados:disparosRealizados,
-                barcosDestuidos:barcosDestuidos,
+                barcosDestruidos:barcosDestruidos,
                 disparosAcertados:disparosAcertados
             }                              
         }
