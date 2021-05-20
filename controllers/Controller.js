@@ -1206,7 +1206,7 @@ exports.cogerTablero=(req,res)=>{
         tuTablero:tuTablero,
         tusBarcos:tusBarcos,
         disparos:disparos,
-        subestado:subestado;
+        subestado:subestado,
         barcosHundidosRival:barcosHundidosRival
     }
     return res.send(respuesta);
