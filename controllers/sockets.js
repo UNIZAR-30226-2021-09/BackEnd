@@ -22,7 +22,7 @@ io.on("connection", (socket) => {
     console.log(userSockets);
   })
 
-  //Redirigir
+  //Redirigir peticion de amistad
   socket.on("friendPetition", (user) => {
     let friendSocket = userSockets.get(user.nombreUsuario.toString());
     console.log("llega peticion de amistad" + user.nombreUsuario.toString());
@@ -35,6 +35,21 @@ io.on("connection", (socket) => {
     console.log("llega peticion aceptar amigo" + user.nombreUsuario.toString());
     console.log(friendSocket);
     socket.to(friendSocket).emit("llegaAceptarInvitacionAmigo");
+  })
+  
+  //Redirigir desafio
+  socket.on("challenge", (user) => {
+    let friendSocket = userSockets.get(user.nombreUsuario.toString());
+    console.log("llega desafio de" + user.nombreUsuario.toString());
+    console.log(friendSocket);
+    socket.to(friendSocket).emit("llegaChallenge");
+  })
+  
+  socket.on("llegaChallenge", (user) => {
+    let friendSocket = userSockets.get(user.nombreUsuario.toString());
+    console.log("llega aceptar desafio" + user.nombreUsuario.toString());
+    console.log(friendSocket);
+    socket.to(friendSocket).emit("llegaAceptarChallenge");
   })
 
   //entrar en una sala por partida en curso
