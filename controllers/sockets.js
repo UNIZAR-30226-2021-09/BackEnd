@@ -50,6 +50,7 @@ io.on("connection", (socket) => {
     console.log("llega aceptar desafio" + user.nombreUsuario.toString());
     console.log(friendSocket);
     socket.to(friendSocket).emit("llegaAceptarChallenge", user.game);
+    console.log("despues de emit llegaAceptarChallenge");
   })
 
   //entrar en una sala por partida en curso
