@@ -59,8 +59,29 @@ io.on("connection", (socket) => {
     
   });
       
+  socket.on("movement", ({game, nuevoTurno }) => {
+    //redirigir movimiento al rival
+    console.log("hace movimiento:");
+    console.log("user.nombreUsuario");
+    console.log(game._id);
+    console.log(io.sockets.adapter.rooms);
+    socket.broadcast.to(game._id.toString()).emit("llegaMovement", {
+      game: game,
+      nuevoTurno: nuevoTurno
+    });
+
+    //alterar tambien en la base de datos
+    Partida.findById(
+      game._id,
+      null, null,
+      (err,result)=>{
+      if (err) ;
+              
+    });
+  });
+  
   // on incoming message
-  socket.on("movement", ({ mv, game, user }) => {
+  /*socket.on("movement", ({game, user }) => {
     //redirigir movimiento al rival
     console.log("llega movimiento de:");
     console.log(game._id);
@@ -75,23 +96,9 @@ io.on("connection", (socket) => {
       null, null,
       (err,result)=>{
       if (err) ;
-      result.tablero.forEach(function(record){
-        if (record.casilla.fila == mv.fila && record.casilla.columna == mv.columna){
-          record.casilla.estado = 'disparada';
-        }
-      });
-      Partida.findByIdAndUpdate(
-        game._id,
-        {
-          tablero: result.tablero
-        },
-        null,
-        (err,result2)=>{
-          if (err) return res.status(500).send('Server error!');
-        }
-      )          
+              
     });
-  });
+  });*/
   
   //cuando creas o aceptas una partida se te une a su room
   socket.on("joinGame", (room) => {
