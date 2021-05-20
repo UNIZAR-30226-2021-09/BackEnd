@@ -118,6 +118,8 @@ io.on("connection", (socket) => {
   //cuando creas o aceptas una partida se te une a su room
   socket.on("joinGame", (room) => {
       socket.join(room.toString());
+    console.log("alguien se ha unido a");
+    console.log(room.toString());
       //socket.to(room).broadcast.emit("notification joined");
   });
 
