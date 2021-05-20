@@ -63,16 +63,16 @@ io.on("connection", (socket) => {
     //redirigir movimiento al rival
     console.log("hace movimiento:");
     console.log("user.nombreUsuario");
-    console.log(game._id);
+    console.log(game);
     console.log(io.sockets.adapter.rooms);
-    socket.broadcast.to(game._id.toString()).emit("llegaMovement", {
+    socket.broadcast.to(game.toString()).emit("llegaMovement", {
       game: game,
       nuevoTurno: nuevoTurno
     });
 
     //alterar tambien en la base de datos
     Partida.findById(
-      game._id,
+      game,
       null, null,
       (err,result)=>{
       if (err) ;
