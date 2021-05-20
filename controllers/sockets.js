@@ -49,7 +49,7 @@ io.on("connection", (socket) => {
     let friendSocket = userSockets.get(user.nombreUsuario.toString());
     console.log("llega aceptar desafio" + user.nombreUsuario.toString());
     console.log(friendSocket);
-    socket.to(friendSocket).emit("llegaAceptarChallenge");
+    socket.to(friendSocket).emit("llegaAceptarChallenge", user.game);
     console.log("despues de emit llegaAceptarChallenge");
   })
 
