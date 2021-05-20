@@ -45,7 +45,7 @@ io.on("connection", (socket) => {
     socket.to(friendSocket).emit("llegaChallenge");
   })
   
-  socket.on("aceptaChallenge", (user) => {
+  socket.on("aceptarChallenge", (user) => {
     let friendSocket = userSockets.get(user.nombreUsuario.toString());
     console.log("llega aceptar desafio" + user.nombreUsuario.toString());
     console.log(friendSocket);
