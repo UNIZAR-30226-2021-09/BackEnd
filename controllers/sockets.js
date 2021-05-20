@@ -64,7 +64,7 @@ io.on("connection", (socket) => {
       ]},
       null, null,
       (err,result)=>{
-        if (err) return res.status(500).send('Server error!');
+        if (err) console.log(err.message);
         result.forEach(function(record){
           console.log(record._id);
           socket.join(record._id.toString());          
