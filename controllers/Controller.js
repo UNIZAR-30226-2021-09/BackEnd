@@ -1186,6 +1186,7 @@ exports.cogerTablero=(req,res)=>{
         tuTablero=partida.tablero1;
         tusBarcos=partida.barcos1.barcos;
         disparos=partida.tablero2;
+        subestado=partida.subestado;
         barcosHundidosRival=[];
         for(var i = 0; i < partida.barcos2.barcos.length; ++i){
             if(partida.barcos2.barcos[i].estado =="hundido" ) barcosHundidosRival.push(partida.barcos2.barcos[i]);
@@ -1195,6 +1196,7 @@ exports.cogerTablero=(req,res)=>{
         tuTablero=partida.tablero2;
         tusBarcos=partida.barcos2.barcos;
         disparos=partida.tablero1;
+        subestado=partida.subestado;
         barcosHundidosRival=[];
         for(var i = 0; i < partida.barcos1.barcos.length; ++i){
             if(partida.barcos1.barcos[i].estado =="hundido" ) barcosHundidosRival.push(partida.barcos1.barcos[i]);
@@ -1204,6 +1206,7 @@ exports.cogerTablero=(req,res)=>{
         tuTablero:tuTablero,
         tusBarcos:tusBarcos,
         disparos:disparos,
+        subestado:subestado;
         barcosHundidosRival:barcosHundidosRival
     }
     return res.send(respuesta);
