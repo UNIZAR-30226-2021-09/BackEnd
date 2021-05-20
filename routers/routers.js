@@ -23,7 +23,7 @@ module.exports=(router) =>{
     router.post('/game/accept',Users.gameAccept);
     router.post('/game/dismiss',Users.gameDismiss);
     router.post('/game/random',Users.blindMatch);
-    router.post('/game/torneo',Users.crearTorneo);
+    //router.post('/game/torneo',Users.crearTorneo);
     router.post('/match/colocarBarcos',Users.colocarBarcos);
     router.post('/match/movimiento',Users.disparo);
     router.post('/match/infoPartida',Users.infoPartida);
