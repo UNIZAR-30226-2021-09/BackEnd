@@ -69,7 +69,7 @@ io.on("connection", (socket) => {
           console.log(record._id);
           socket.join(record._id.toString());          
         });
-        console.log("unido a todos los juegos);
+        console.log("unido a todos los juegos");
         //socket.join("hola");          
       });
     
