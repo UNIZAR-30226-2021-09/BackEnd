@@ -7,9 +7,6 @@ const Request = mongoose.model('Requests',requestSchema);
 const partidaSchema = require('../models/partidas');
 const Partida = mongoose.model('Partidas',partidaSchema);
 
-const torneoSchema = require('../models/torneo');
-const Torneo = mongoose.model('Torneo',torneoSchema);
-
 const jwt=require('jsonwebtoken');
 const bcrypt=require('bcryptjs');
 const SECRET_KEY='secretkey123456';
@@ -678,8 +675,7 @@ exports.me=(req,res)=>{
 
 exports.profile=(req,res)=>{
     User.findOne({nombreUsuario: req.body.nombreUsuario}, (err,user)=>{
-        if(err) return res.status(500).send({ mensaje:`Error al buscar el usuario ${req.body.nombreUsuario}`});
-        if(!user) return res.status(500).send({ mensaje:`No se ha encontrado el usuario ${req.body.nombreUsuario}`});
+        if(err) return res.status(500).send({ mensaje:`No se ha encontrado el usuario ${req.body.nombreUsuario}`});
         User.count(
             {
                 puntos:{$gt:user.puntos}
@@ -799,7 +795,7 @@ exports.colocarBarcos=(req,res)=>{
     correcto=correcto&&colocarBarco(barcosReq.crucero,2,colocados,barcos,"crucero");
 
     if(!correcto){
-        return res.status(500).send('Barcos mal colocados, no cumplen alguna restricción');
+        return res.status(500).send('Barcos mal colocados, no cumlen alguna restricción');
     }
     barcosinsert={
         colocados:true,
@@ -897,13 +893,13 @@ exports.disparo=(req,res)=>{
                             disparosRealizados=partida.tablero2.length;
                             //El número de barcos destruidos
                             barcosDestruidos = 0;
-                            for(var k = 0; k < partida.barcos2.barcos.length; ++k){
-                                if(partida.barcos2.barcos[k].estado =="hundido" ) barcosDestruidos++;
+                            for(var j = 0; j < partida.barcos2.barcos.length; ++j){
+                                if(partida.barcos2.barcos[j].estado =="hundido" ) barcosDestruidos++;
                             }
                             //El número de disparos acertados
                             disparosAcertados=0;
-                            for(var j = 0; j < partida.tablero2.length; ++j){
-                                if(partida.tablero2[j].casilla.estado =="acierto" ) disparosAcertados++;
+                            for(var k = 0; k < partida.tablero2.length; ++k){
+                                if(partida.tablero2[k].casilla.estado =="acierto" ) disparosAcertados++;
                             }
                             respuesta={
                                 disparo:"hundido",
@@ -1004,13 +1000,13 @@ exports.disparo=(req,res)=>{
                             disparosRealizados=partida.tablero1.length;
                             //El número de barcos destruidos
                             barcosDestruidos = 0;
-                            for(var k = 0; k < partida.barcos1.barcos.length; ++k){
-                                if(partida.barcos1.barcos[k].estado =="hundido" ) barcosDestruidos++;
+                            for(var j = 0; j < partida.barcos1.barcos.length; ++j){
+                                if(partida.barcos1.barcos[j].estado =="hundido" ) barcosDestruidos++;
                             }
                             //El número de disparos acertados
                             disparosAcertados=0;
-                            for(var j = 0; j < partida.tablero1.length; ++j){
-                                if(partida.tablero1[j].casilla.estado =="acierto" ) disparosAcertados++;
+                            for(var k = 0; k < partida.tablero1.length; ++k){
+                                if(partida.tablero1[k].casilla.estado =="acierto" ) disparosAcertados++;
                             }
                             respuesta={
                                 disparo:"hundido",
@@ -1074,53 +1070,6 @@ exports.disparo=(req,res)=>{
                     if(err) return res.status(500).send('Server error!');
                     if(!myuser)return res.status(500).send({mensaje: 'Error al actualizar los datos del usuario' });
                     
-                    //Si la partida es un torneo compruebas si ya existe la siguiente partida. Si no, la creas
-                    if(partida.tipo == "torneo"){
-                        if(partida.torneo.eliminatoria == 1){
-                            Partida.find(
-                                {
-                                    torneo:partida.torneo,
-                                    eliminatoria: 2
-                                },
-                                (err,result)=>{
-                                    if (err) return res.status(500).send('Server Error');
-                                    if(!result){
-                                        //los otros dos contendientes no han terminado, creamos la partida
-                                        const final= new Partida ({
-                                            participante1: req.body.nombreUsuario,
-                                            ganador: undefined,
-                                            estado: "enCurso",
-                                            subestado: "colocandoBarcos",
-                                            tipo: "torneo",
-                                            barcos1:
-                                            {
-                                                colocados: false,
-                                                barcos:[]
-                                            },
-                                            barcos2:
-                                            {
-                                                colocados: false,
-                                                barcos:[]
-                                            },
-                                            torneo: torneo,
-                                            eliminatoria: 2,
-                                        });
-
-                                        final.save(function (err) {
-                                            if (err) return res.status(500).send('Error al guardar final de torneo');                    
-                                        });
-                                    }
-                                    else{
-                                        final.participante2 = req.body.nombreUsuario;
-                                        final.save(function (err) {
-                                            if (err) return res.status(500).send('Error al actualiza final de torneo');                    
-                                        });
-                                    }
-                                }
-                            )
-                        }
-                    }
-
                     //Actualizamos los datos del rival
                     if(partida.participante1==req.body.nombreUsuario){
                         rival=partida.participante2;
@@ -1141,8 +1090,7 @@ exports.disparo=(req,res)=>{
                     
                         return res.send(respuesta);
             
-                    });
-                });
+                    });});
                 }
             });
         }
@@ -1207,7 +1155,7 @@ exports.infoPartida=(req,res)=>{
         //El número de disparos acertados
         disparosAcertados=0;
         for(var i = 0; i < partida.tablero1.length; ++i){
-            if(partida.tablero1[i].estado =="acierto" ) disparosAcertados++;
+            if(partida.tablero1[i].casilla.estado =="acierto" ) disparosAcertados++;
         }
         respuesta={
             infoPartida:{
@@ -1260,109 +1208,4 @@ exports.cogerTablero=(req,res)=>{
     }
     return res.send(respuesta);
     });
-}
-
-exports.crearTorneo=(req,res)=>{
-    User.find(
-        {
-            nombreUsuario:req.body.participante1,
-            amigos:req.body.participante2
-        },
-        (err,result)=>{
-        if (err) return res.status(500).send('Server Error');
-        if(!result){
-            return res.status(500).send(
-            `El usuario ${req.body.nombreAmigo} no está en tu lista de amigos`)
-        }
-        User.find(
-            {
-                nombreUsuario:req.body.participante1,
-                amigos:req.body.participante3
-            },
-            (err,result)=>{
-            if (err) return res.status(500).send('Server Error');
-            if(!result){
-                return res.status(500).send(
-                `El usuario ${req.body.nombreAmigo} no está en tu lista de amigos`)
-            }
-            User.find(
-                {
-                    nombreUsuario:req.body.participante1,
-                    amigos:req.body.participante4
-                },
-                (err,result)=>{
-                if (err) return res.status(500).send('Server Error');
-                if(!result){
-                    return res.status(500).send(
-                    `El usuario ${req.body.nombreAmigo} no está en tu lista de amigos`)
-                }
-        
-                //Se crean el torneo y las partidas
-                const torneo= new Torneo ({
-                    
-                });
-                
-                const partida1= new Partida ({
-                    participante1: req.body.nombreUsuario,
-                    participante2: req.body.participante2,
-                    ganador: undefined,
-                    estado: "enCurso",
-                    subestado: "colocandoBarcos",
-                    tipo: "torneo",
-                    barcos1:
-                    {
-                        colocados: false,
-                        barcos:[]
-                    },
-                    barcos2:
-                    {
-                        colocados: false,
-                        barcos:[]
-                    },
-                    torneo: torneo,
-                    eliminatoria: 1,
-                });
-
-                const partida2= new Partida ({
-                    participante1: req.body.participante3,
-                    participante2: req.body.participante4,
-                    ganador: undefined,
-                    estado: "enCurso",
-                    subestado: "colocandoBarcos",
-                    tipo: "torneo",
-                    barcos1:
-                    {
-                        colocados: false,
-                        barcos:[]
-                    },
-                    barcos2:
-                    {
-                        colocados: false,
-                        barcos:[]
-                    },
-                    torneo: torneo,
-                    eliminatoria: 1,
-                });
-
-                torneo.partidas.push(partida1);
-                torneo.partidas.push(partida2);
-
-                //Añadimos torneo y partida a la base de datos
-                torneo.save(function (err) {
-                    if (err) return res.status(500).send('Error al guardar partida1 de torneo');                    
-                });
-                partida1.save(function (err) {
-                    if (err) return res.status(500).send('Error al guardar partida1 de torneo');                    
-                });
-                partida2.save(function (err) {
-                    if (err) return res.status(500).send('Error al guardar partida2 de torneo');
-                    //devolvemos Mensaje
-                    respuesta={
-                        mensaje:'El torneo ha comenzado. En tu lista de partidas encontrarás la partida que te toca jugar'
-                    }
-                    return res.send(respuesta);
-                });
-            })
-        })
-    })     
 }
