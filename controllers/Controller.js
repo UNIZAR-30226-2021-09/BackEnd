@@ -115,7 +115,7 @@ exports.loginUser= (req, res) => {
                     puntos:user.puntos,
                     historial:historial
                 }
-                res.send(dataUser);
+                return res.send(dataUser);
                 });});});
             }else{
                 // contraseña equivocada
@@ -193,7 +193,7 @@ exports.friendList=(req,res)=>{
 
         if(!user){
             // usuario no existe
-            res.send({mensake: `usuario ${req.body.nombreUsuario} no encontrado` });
+            return res.send({mensake: `usuario ${req.body.nombreUsuario} no encontrado` });
         } else{
             //devuelve la lista de amigos
             return res.send(user.amigos);
