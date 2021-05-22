@@ -1438,6 +1438,7 @@ exports.infoPartida=(req,res)=>{
 }
 
 
+
 exports.cogerTablero=(req,res)=>{
     Partida.findById(
     {
@@ -1477,5 +1478,155 @@ exports.cogerTablero=(req,res)=>{
         barcosHundidosRival:barcosHundidosRival
     }
     return res.send(respuesta);
+    });
+}
+
+
+exports.rendirse=(req,res)=>{
+    Partida.findById(
+    {
+        _id: req.body.gameid
+    },(err,partida) =>{
+    if (err) return res.status(500).send('Server error!');
+    if(!partida) return res.status(500).send('No existe una partida con esa id');
+    if(partida.estado!="enCurso") return res.status(500).send('No te puedes rendir ahora');
+    if(partida.participante1!=req.body.nombreUsuario && partida.participante2!=req.body.nombreUsuario) return res.status(500).send('No perteneces a esta partida');
+    if(partida.participante1==req.body.nombreUsuario){
+        
+        //Estadisticas de partida del J1
+        partida.ganador=partida.participante2;
+        ganador=false;
+        puntos=-20;
+        if(partida.tipo!="ciegas") puntos=0;
+        disparosRealizados=partida.tablero2.length;
+        //El número de barcos destruidos
+        barcosDestruidos = 0;
+        for(var i = 0; i < partida.barcos2.barcos.length; ++i){
+            if(partida.barcos2.barcos[i].estado =="hundido" ) barcosDestruidos++;
+        }
+        //El número de disparos acertados
+        disparosAcertados=0;
+        for(var i = 0; i < partida.tablero2.length; ++i){
+            if(partida.tablero2[i].casilla.estado =="acierto" ) disparosAcertados++;
+        }
+        respuesta={
+            infoPartida:{
+                ganador:ganador,
+                puntos:puntos,
+                disparosRealizados:disparosRealizados,
+                barcosDestruidos:barcosDestruidos,
+                disparosAcertados:disparosAcertados
+            }                              
+        }
+        Partida.findByIdAndUpdate(
+        {
+            _id: req.body.gameid
+        },{
+            ganador:partida.participante2,
+            estado:"finalizada"
+        }
+        ,(err,partida) =>{
+        if(partida.tipo=="ciegas"){
+            
+            User.findOneAndUpdate(
+            { 
+                nombreUsuario: partida.participante2,
+            },
+            {
+                $inc: { 'partidasGanadas':1,'puntos':puntos}                
+            },
+            {new: true},
+            (err,myuser) =>{
+            if(err) return res.status(500).send('Server error!');
+            if(!myuser)return res.status(500).send({mensaje: 'Error al actualizar los datos del rival' });
+            
+            
+            User.findOneAndUpdate(
+            { 
+                nombreUsuario: req.body.nombreUsuario,
+            },
+            {
+                $inc: { 'partidasPerdidas':1,'puntos':-respuesta.infoPartida.puntos}                
+            },
+            {new: true},
+            (err,myuser2) =>{
+            if(err) return res.status(500).send('Server error!');
+            if(!myuser2)return res.status(500).send({mensaje: 'Error al actualizar los datos del usuario' });
+            
+                return res.send(respuesta);
+    
+            });});
+        }
+        return res.send(respuesta);
+        });
+    }else{
+        //Estadisticas de partida del J2
+        partida.ganador=partida.participante1;
+        ganador=false;
+        puntos=-20;
+        if(partida.tipo!="ciegas") puntos=0;
+        disparosRealizados=partida.tablero1.length;
+        //El número de barcos destruidos
+        barcosDestruidos = 0;
+        for(var i = 0; i < partida.barcos1.barcos.length; ++i){
+            if(partida.barcos1.barcos[i].estado =="hundido" ) barcosDestruidos++;
+        }
+        //El número de disparos acertados
+        disparosAcertados=0;
+        for(var i = 0; i < partida.tablero1.length; ++i){
+            if(partida.tablero1[i].casilla.estado =="acierto" ) disparosAcertados++;
+        }
+        respuesta={
+            infoPartida:{
+                ganador:ganador,
+                puntos:puntos,
+                disparosRealizados:disparosRealizados,
+                barcosDestruidos:barcosDestruidos,
+                disparosAcertados:disparosAcertados
+            }                              
+        }
+        Partida.findByIdAndUpdate(
+        {
+            _id: req.body.gameid
+        },{
+            ganador:partida.participante1,
+            estado:"finalizada"
+        }
+        ,(err,partida) =>{
+        if(partida.tipo=="ciegas"){
+            
+            User.findOneAndUpdate(
+            { 
+                nombreUsuario: partida.participante1,
+            },
+            {
+                $inc: { 'partidasGanadas':1,'puntos':puntos}                
+            },
+            {new: true},
+            (err,myuser) =>{
+            if(err) return res.status(500).send('Server error!');
+            if(!myuser)return res.status(500).send({mensaje: 'Error al actualizar los datos del rival' });
+            
+            
+            User.findOneAndUpdate(
+            { 
+                nombreUsuario: req.body.nombreUsuario,
+            },
+            {
+                $inc: { 'partidasPerdidas':1,'puntos':-respuesta.infoPartida.puntos}                
+            },
+            {new: true},
+            (err,myuser2) =>{
+            if(err) return res.status(500).send('Server error!');
+            if(!myuser2)return res.status(500).send({mensaje: 'Error al actualizar los datos del usuario' });
+            
+                return res.send(respuesta);
+    
+            });});
+        }
+        return res.send(respuesta);
+        });
+    }
+    
     });
 }
