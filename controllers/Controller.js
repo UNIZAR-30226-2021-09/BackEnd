@@ -330,7 +330,7 @@ exports.newGame=(req,res)=>{
 }
 
 exports.gameIA=(req,res)=>{
-    const partida= new Partida ({
+    partida= new Partida ({
         participante1: req.body.nombreUsuario,
         participante2: "I.A",
         ganador: undefined,
@@ -344,14 +344,15 @@ exports.gameIA=(req,res)=>{
         },
         barcos2:
         {
-            colocados: false,
+            colocados: true,
             barcos:[]
         },
     });
+    partida=colocarBarcosIA(partida);
     //Añadimos la partida a la base de datos
     partida.save(function (err) {
         if (err) return res.status(500).send('Error en la petición');
-        //devolvemos la lista de solicitudes pendientes
+        partida.barcos2.barcos=[];
         return res.send(partida);
     });
 }
@@ -764,6 +765,67 @@ function colocarBarco(barco,longitud,mapa,barcos,tipobarco){
     return true;
 }
 
+function barcoRandomIA(){
+    randomfil=Math.floor((Math.random() * 10));
+    randomdcol=Math.floor((Math.random() * 10));
+    randomdir=Math.floor((Math.random() * 2));
+    if(randomdir==0){
+        direccion="horizontal";
+    }else{
+        direccion="vertical";
+    }
+    return({
+        posicion:{
+            fila:randomfil,
+            columna:randomdcol
+        },
+        direccion: direccion
+    })
+}
+
+function colocarBarcosIA(partida){
+    
+    
+    colocados= new Map();
+    barcos=[];
+    
+    correcto=false;
+    while(!correcto){
+        barco=barcoRandomIA();
+        correcto=colocarBarco(barco,5,colocados,barcos,"portaaviones");
+    }
+    correcto=false;
+    while(!correcto){
+        barco=barcoRandomIA();
+        correcto=colocarBarco(barco,4,colocados,barcos,"buque");
+    }
+
+    correcto=false;
+    while(!correcto){
+        barco=barcoRandomIA();
+        correcto=colocarBarco(barco,3,colocados,barcos,"submarino1");
+    }
+    correcto=false;
+    while(!correcto){
+        barco=barcoRandomIA();
+        correcto=colocarBarco(barco,3,colocados,barcos,"submarino2");
+    }
+    correcto=false;
+    while(!correcto){
+        barco=barcoRandomIA();
+        correcto=colocarBarco(barco,2,colocados,barcos,"crucero");
+    }
+
+    barcosinsert={
+        colocados:true,
+        barcos:barcos
+    }
+    partida.barcos2=barcosinsert;
+    
+
+    return partida;
+}
+
 exports.colocarBarcos=(req,res)=>{
     Partida.findById(
     { 
@@ -833,6 +895,203 @@ exports.colocarBarcos=(req,res)=>{
     })});
 }
 
+function disparovalido(tablero,fila,columna){
+    if(fila>=10 || fila<0 || columna>=10 || columna<0){
+        return false;
+    }
+    if(tablero.find(c=> c.casilla.fila==fila&&c.casilla.columna==columna)) return false;
+    else return true;
+}
+
+function movimientoIA(partida){
+    tocado=true;
+    finIA=false;
+    disparosIA=[];
+    while(tocado&&!finIA){
+        objetivo  = partida.barcos1.barcos.find(barco=> barco.estado=="tocado");
+        if(objetivo){
+            continuar=false;
+            tocados=[];
+            for(var k = 0; k < objetivo.coordenadas.length; ++k){
+                coordenadas={
+                    fila:   objetivo.coordenadas[k].fila,
+                    columna:objetivo.coordenadas[k].columna
+                }
+                tocado = partida.tablero1.find(c=> c.casilla.fila==coordenadas.fila
+                    &&c.casilla.columna==coordenadas.columna);
+                if(tocado) tocados.push(coordenadas);
+            }
+
+            if(tocados.length==1){//sabemos unicamente un casilla tocada
+                valido=false;
+                while(!valido){
+                    random=Math.floor((Math.random() * 4));
+                    if(random==0){
+                        randomup=0;randomright=1;
+                    }else if(random==1){
+                        randomup=0;randomright=-1;
+                    }else if(random==2){
+                        randomup=1;randomright=0;
+                    }else{
+                        randomup=-1;randomright=0;
+                    }
+                    disparo={
+                        fila:tocados[0].fila+randomup,
+                        columna:tocados[0].columna+randomright
+                    };
+                    valido= disparovalido(partida.tablero1,disparo.fila,disparo.columna);
+                }
+            }else{//sabemos al menos 2 coordenadas de un barco tocado
+                if(tocados[0].fila==tocados[1].fila){
+                    //el barco esta en posición horizontal, disparamos en la misma fila
+                    disparo={
+                        fila:tocados[0].fila,
+                        columna:tocados[0].columna-1
+                    }
+                    if(!disparovalido(partida.tablero1,disparo.fila,disparo.columna)){
+                        disparo={
+                            fila:tocados[tocados.length-1].fila,
+                            columna:tocados[tocados.length-1].columna+1
+                        }
+                    }
+                }else{
+                    //el barco esta en posición vertical, disparamos en la misma columna
+                    disparo={
+                        fila:tocados[0].fila-1,
+                        columna:tocados[0].columna
+                    }
+                    if(!disparovalido(partida.tablero1,disparo.fila,disparo.columna)){
+                        disparo={
+                            fila:tocados[tocados.length-1].fila+1,
+                            columna:tocados[tocados.length-1].columna
+                        }
+                    }
+                    
+                }            
+            }
+            
+        }else{
+            //No hay pistas sobre donde hay barcos
+            valido=false;
+            while(!valido){
+                randomfil=Math.floor((Math.random() * 11));
+                randomdcol=Math.floor((Math.random() * 11));
+                disparo={
+                    fila:randomfil,
+                    columna:randomdcol
+                };
+                valido= disparovalido(partida.tablero1,disparo.fila,disparo.columna);
+            }
+        }
+        //Ya se ha decidido el disparo a realizar
+
+        partida.subestado="turnoJ1";
+        //busca un barco del J1 que tenga un barco que tenga una coordenada que coincida con el disparo
+        tocado=false;
+        for (var i in partida.barcos1.barcos) {
+            if (partida.barcos1.barcos[i].coordenadas.find(coordenada=>(coordenada.fila==disparo.fila)
+                &&(coordenada.columna==disparo.columna))){
+                //Ha tocado a un barco
+                tocado=true;
+                partida.subestado="turnoJ2"
+                partida.barcos1.barcos[i].restantes=partida.barcos1.barcos[i].restantes-1;
+                hundido=false;
+                if(partida.barcos1.barcos[i].restantes>0){
+                    partida.barcos1.barcos[i].estado="tocado";
+                }else{
+                    partida.barcos1.barcos[i].estado="hundido";
+                    hundido=true;
+                }
+                partida.tablero1.push({
+                    casilla: {
+                        fila: disparo.fila,
+                        columna: disparo.columna,
+                        estado: "acierto"
+                    }}
+                );
+                if(hundido){
+                    //has hundido un barco
+                    barco  = partida.barcos1.barcos.find(barco=> barco.estado!="hundido");
+                    if(!barco){
+                        //no quedan barcos en pie "HA GANADO LA I.A"
+                        finIA=true;
+                        partida.ganador=partida.participante2;
+                        partida.estado="finalizada";
+                        //Estadisticas de partida
+                        ganador=(partida.ganador==partida.participante2);
+                        puntos=20;
+                        if(partida.tipo!="ciegas") puntos=0;
+                        disparosRealizados=partida.tablero2.length;
+                        //El número de barcos destruidos
+                        barcosDestruidos = 0;
+                        for(var j = 0; j < partida.barcos2.barcos.length; ++j){
+                            if(partida.barcos2.barcos[j].estado =="hundido" ) barcosDestruidos++;
+                        }
+                        //El número de disparos acertados
+                        disparosAcertados=0;
+                        for(var k = 0; k < partida.tablero2.length; ++k){
+                            if(partida.tablero2[k].casilla.estado =="acierto" ) disparosAcertados++;
+                        }
+                        respuesta={
+                            disparo:"fallo",
+                            fin:true,  
+                            infoPartida:{
+                                ganador:false,
+                                puntos:0,
+                                disparosRealizados:disparosRealizados,
+                                barcosDestruidos:barcosDestruidos,
+                                disparosAcertados:disparosAcertados
+                            }                      
+                        }
+                        respuestaIA={
+                            disparo:"hundido",
+                            fin:true                               
+                        }        
+                    }else{
+                        //has hundido un barco, pero siguen barcos en pie
+                        respuestaIA={
+                            disparo:"hundido",
+                            barco:partida.barcos1.barcos[i],
+                            fin:false                               
+                        }
+                    }
+                }else{
+                    //has tocado un barco, pero no lo has hundido
+                    respuestaIA={
+                        disparo:"tocado",
+                        fin:false                               
+                    }
+                }
+            }
+        }
+        //no ha tocado un barco
+        if(!tocado){
+            partida.tablero1.push({
+                casilla: {
+                    fila: disparo.fila,
+                    columna: disparo.columna,
+                    estado: "fallo"
+                }
+            });
+            respuestaIA={disparo:"fallo",fin:false};
+        }
+        insert={
+            fila:disparo.fila,
+            columna:disparo.columna,
+            estado:respuestaIA.disparo,
+            fin:respuestaIA.fin
+
+        }
+        disparosIA.push(insert);
+        console.log(insert);
+
+    }
+    partida.subestado="turnoJ1";
+    return {
+        partida:partida,
+        disparosIA:disparosIA
+    };
+}
 
 exports.disparo=(req,res)=>{
     Partida.findById(
@@ -940,6 +1199,12 @@ exports.disparo=(req,res)=>{
                     }
                 });
                 respuesta={disparo:"fallo",fin:false};
+                if(partida.tipo=="ia"){ 
+                    console.log("Movimiento I.A.");
+                    IA=movimientoIA(partida);
+                    partida=IA.partida;
+                    respuesta.movimientoIA=IA.disparosIA;
+                }
             }
             Partida.findByIdAndUpdate( 
                 { 
