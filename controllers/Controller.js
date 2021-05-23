@@ -1145,6 +1145,65 @@ exports.disparo=(req,res)=>{
                             fin=true;
                             partida.ganador=req.body.nombreUsuario;
                             partida.estado="finalizada";
+                            
+                            console.log("has ganado")
+                            console.log(partida.tipo);
+                            console.log(partida.tipo == "torneo");
+                            //Si la partida es un torneo compruebas si ya existe la siguiente partida. Si no, la creas
+                            if(partida.tipo == "torneo"){
+                                console.log("partida de torneo ganada por j1")
+                                console.log(partida.eliminatoria)
+                                if(partida.eliminatoria == 1){
+                                    console.log("es semifinal")
+                                    console.log("partida.torneo")
+                                    Partida.find(
+                                        {
+                                            torneo:partida.torneo,
+                                            eliminatoria: 2
+                                        },
+                                        (err,result)=>{
+                                            if (err) return res.status(500).send('Server Error');
+                                            if(result.length === 0){
+                                                console.log("primero en ganar")
+                                                
+                                                //los otros dos contendientes no han terminado, creamos la partida
+                                                const final= new Partida ({
+                                                    participante1: req.body.nombreUsuario,
+                                                    ganador: undefined,
+                                                    estado: "enCurso",
+                                                    subestado: "colocandoBarcos",
+                                                    tipo: "torneo",
+                                                    barcos1:
+                                                    {
+                                                        colocados: false,
+                                                        barcos:[]
+                                                    },
+                                                    barcos2:
+                                                    {
+                                                        colocados: false,
+                                                        barcos:[]
+                                                    },
+                                                    torneo: partida.torneo,
+                                                    eliminatoria: 2,
+                                                });
+
+                                                final.save(function (err) {
+                                                    if (err) return res.status(500).send('Error al guardar final de torneo');                    
+                                                });
+                                            }
+                                            else{
+                                                console.log("segundo en ganar")
+                                                console.log(result)
+                                                result[0].participante2 = req.body.nombreUsuario;
+                                                result[0].save(function (err) {
+                                                    if (err) return res.status(500).send('Error al actualiza final de torneo');                    
+                                                });
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                            
                             //Estadisticas de partida
                             ganador=(partida.ganador==req.body.nombreUsuario);
                             puntos=20;
@@ -1218,18 +1277,26 @@ exports.disparo=(req,res)=>{
                         return res.send(respuesta);
                     }else{
                         //HAS GANADO, actualizamos los marcadores del usuario
-                        User.findOneAndUpdate(
+                        console.log("partida2")
+                    console.log(partida2.tipo)
+                    console.log(partida2.eliminatoria)
+                    if(partida2.tipo=="torneo" && partida2.eliminatoria==2){
+                        //actualizamos los marcadores del usuario
+                        console.log("es torneo y final")
+                    User.findOneAndUpdate(
                         { 
                             nombreUsuario: req.body.nombreUsuario,
                         },
                         {
-                            $inc: { 'partidasGanadas':1,'puntos':respuesta.infoPartida.puntos}                
+                            $inc: { 'partidasGanadas':1,'puntos':respuesta.infoPartida.puntos,'torneosGanados':1}                
                         },
                         {new: true},
                         (err,myuser) =>{
                         if(err) return res.status(500).send('Server error!');
                         if(!myuser)return res.status(500).send({mensaje: 'Error al actualizar los datos del usuario' });
-                        
+                        console.log("actualizacion estadisticas torneo")
+                       
+    
                         //Actualizamos los datos del rival
                         if(partida.participante1==req.body.nombreUsuario){
                             rival=partida.participante2;
@@ -1250,7 +1317,47 @@ exports.disparo=(req,res)=>{
                         
                             return res.send(respuesta);
                 
-                        });});
+                        });
+                    });
+                    } else {
+                        //actualizamos los marcadores del usuario
+                    User.findOneAndUpdate(
+                        { 
+                            nombreUsuario: req.body.nombreUsuario,
+                        },
+                        {
+                            $inc: { 'partidasGanadas':1,'puntos':respuesta.infoPartida.puntos}                
+                        },
+                        {new: true},
+                        (err,myuser) =>{
+                        if(err) return res.status(500).send('Server error!');
+                        if(!myuser)return res.status(500).send({mensaje: 'Error al actualizar los datos del usuario' });
+                        
+                       
+    
+                        //Actualizamos los datos del rival
+                        if(partida.participante1==req.body.nombreUsuario){
+                            rival=partida.participante2;
+                        }else{
+                            rival=partida.participante1;
+                        }
+                        User.findOneAndUpdate(
+                        { 
+                            nombreUsuario: rival,
+                        },
+                        {
+                            $inc: { 'partidasPerdidas':1,'puntos':-respuesta.infoPartida.puntos}                
+                        },
+                        {new: true},
+                        (err,myuser2) =>{
+                        if(err) return res.status(500).send('Server error!');
+                        if(!myuser2)return res.status(500).send({mensaje: 'Error al actualizar los datos del rival' });
+                        
+                            return res.send(respuesta);
+                
+                        });
+                    });
+                    }
                     }
                 });
             
@@ -1292,6 +1399,62 @@ exports.disparo=(req,res)=>{
                         barco  = partida.barcos1.barcos.find(barco=> barco.estado!="hundido");
                         if(!barco){
                             //no quedan barcos en pie "HAS GANADO"
+                            console.log("has ganado")
+                            console.log(partida.tipo);
+                            console.log(partida.tipo == "torneo");
+                            //Si la partida es un torneo compruebas si ya existe la siguiente partida. Si no, la creas
+                            if(partida.tipo == "torneo"){
+                                console.log("partida de torneo ganada por j2")
+                                console.log(partida.eliminatoria)
+                                if(partida.eliminatoria == 1){
+                                    console.log("es semifinal")
+                                    Partida.find(
+                                        {
+                                            torneo:partida.torneo,
+                                            eliminatoria: 2
+                                        },
+                                        (err,result)=>{
+                                            if (err) return res.status(500).send('Server Error');
+                                            if(result.length === 0){
+                                                console.log("primero en ganar")
+                                                
+                                                //los otros dos contendientes no han terminado, creamos la partida
+                                                const final= new Partida ({
+                                                    participante1: req.body.nombreUsuario,
+                                                    ganador: undefined,
+                                                    estado: "enCurso",
+                                                    subestado: "colocandoBarcos",
+                                                    tipo: "torneo",
+                                                    barcos1:
+                                                    {
+                                                        colocados: false,
+                                                        barcos:[]
+                                                    },
+                                                    barcos2:
+                                                    {
+                                                        colocados: false,
+                                                        barcos:[]
+                                                    },
+                                                    torneo: partida.torneo,
+                                                    eliminatoria: 2,
+                                                });
+
+                                                final.save(function (err) {
+                                                    if (err) return res.status(500).send('Error al guardar final de torneo');                    
+                                                });
+                                            }
+                                            else{
+                                                console.log("segundo en ganar")
+                                                console.log(result)
+                                                result[0].participante2 = req.body.nombreUsuario;
+                                                result[0].save(function (err) {
+                                                    if (err) return res.status(500).send('Error al actualiza final de torneo');                    
+                                                });
+                                            }
+                                        }
+                                    )
+                                }
+                            }
                             fin=true;
                             partida.ganador=req.body.nombreUsuario;
                             partida.estado="finalizada";
@@ -1360,39 +1523,90 @@ exports.disparo=(req,res)=>{
                     return res.send(respuesta);
                 }else{
                     //HAS GANADO, actualizamos los marcadores del usuario
-                    User.findOneAndUpdate(
-                    { 
-                        nombreUsuario: req.body.nombreUsuario,
-                    },
-                    {
-                        $inc: { 'partidasGanadas':1,'puntos':respuesta.infoPartida.puntos}                
-                    },
-                    {new: true},
-                    (err,myuser) =>{
-                    if(err) return res.status(500).send('Server error!');
-                    if(!myuser)return res.status(500).send({mensaje: 'Error al actualizar los datos del usuario' });
                     
-                    //Actualizamos los datos del rival
-                    if(partida.participante1==req.body.nombreUsuario){
-                        rival=partida.participante2;
-                    }else{
-                        rival=partida.participante1;
+                    
+                    
+                   console.log("partida2")
+                    console.log(partida2.tipo)
+                    console.log(partida2.eliminatoria)
+                    if(partida2.tipo=="torneo" && partida2.eliminatoria==2){
+                        //actualizamos los marcadores del usuario
+                        console.log("es torneo y final")
+                    User.findOneAndUpdate(
+                        { 
+                            nombreUsuario: req.body.nombreUsuario,
+                        },
+                        {
+                            $inc: { 'partidasGanadas':1,'puntos':respuesta.infoPartida.puntos,'torneosGanados':1}                
+                        },
+                        {new: true},
+                        (err,myuser) =>{
+                        if(err) return res.status(500).send('Server error!');
+                        if(!myuser)return res.status(500).send({mensaje: 'Error al actualizar los datos del usuario' });
+                        console.log("actualizacion estadisticas torneo")
+                       
+    
+                        //Actualizamos los datos del rival
+                        if(partida.participante1==req.body.nombreUsuario){
+                            rival=partida.participante2;
+                        }else{
+                            rival=partida.participante1;
+                        }
+                        User.findOneAndUpdate(
+                        { 
+                            nombreUsuario: rival,
+                        },
+                        {
+                            $inc: { 'partidasPerdidas':1,'puntos':-respuesta.infoPartida.puntos}                
+                        },
+                        {new: true},
+                        (err,myuser2) =>{
+                        if(err) return res.status(500).send('Server error!');
+                        if(!myuser2)return res.status(500).send({mensaje: 'Error al actualizar los datos del rival' });
+                        
+                            return res.send(respuesta);
+                
+                        });
+                    });
+                    } else {
+                        //actualizamos los marcadores del usuario
+                    User.findOneAndUpdate(
+                        { 
+                            nombreUsuario: req.body.nombreUsuario,
+                        },
+                        {
+                            $inc: { 'partidasGanadas':1,'puntos':respuesta.infoPartida.puntos}                
+                        },
+                        {new: true},
+                        (err,myuser) =>{
+                        if(err) return res.status(500).send('Server error!');
+                        if(!myuser)return res.status(500).send({mensaje: 'Error al actualizar los datos del usuario' });
+                        
+                       
+    
+                        //Actualizamos los datos del rival
+                        if(partida.participante1==req.body.nombreUsuario){
+                            rival=partida.participante2;
+                        }else{
+                            rival=partida.participante1;
+                        }
+                        User.findOneAndUpdate(
+                        { 
+                            nombreUsuario: rival,
+                        },
+                        {
+                            $inc: { 'partidasPerdidas':1,'puntos':-respuesta.infoPartida.puntos}                
+                        },
+                        {new: true},
+                        (err,myuser2) =>{
+                        if(err) return res.status(500).send('Server error!');
+                        if(!myuser2)return res.status(500).send({mensaje: 'Error al actualizar los datos del rival' });
+                        
+                            return res.send(respuesta);
+                
+                        });
+                    });
                     }
-                    User.findOneAndUpdate(
-                    { 
-                        nombreUsuario: rival,
-                    },
-                    {
-                        $inc: { 'partidasPerdidas':1,'puntos':-respuesta.infoPartida.puntos}                
-                    },
-                    {new: true},
-                    (err,myuser2) =>{
-                    if(err) return res.status(500).send('Server error!');
-                    if(!myuser2)return res.status(500).send({mensaje: 'Error al actualizar los datos del rival' });
-                    
-                        return res.send(respuesta);
-            
-                    });});
                 }
             });
         }
@@ -1666,4 +1880,108 @@ exports.rendirse=(req,res)=>{
     }
     
     });
+}
+exports.crearTorneo=(req,res)=>{
+    User.find(
+        {
+            nombreUsuario:req.body.participante1,
+            amigos:req.body.participante2
+        },
+        (err,result)=>{
+        if (err) return res.status(500).send('Server Error');
+        if(!result){
+            return res.status(500).send(
+            `El usuario ${req.body.nombreAmigo} no está en tu lista de amigos`)
+        }
+        User.find(
+            {
+                nombreUsuario:req.body.participante1,
+                amigos:req.body.participante3
+            },
+            (err,result)=>{
+            if (err) return res.status(500).send('Server Error');
+            if(!result){
+                return res.status(500).send(
+                `El usuario ${req.body.nombreAmigo} no está en tu lista de amigos`)
+            }
+            User.find(
+                {
+                    nombreUsuario:req.body.participante1,
+                    amigos:req.body.participante4
+                },
+                (err,result)=>{
+                if (err) return res.status(500).send('Server Error');
+                if(!result){
+                    return res.status(500).send(
+                    `El usuario ${req.body.nombreAmigo} no está en tu lista de amigos`)
+                }
+        
+                //Se crean el torneo y las partidas
+                const torneo= new Torneo ({
+                    
+                });
+                
+                const partida1= new Partida ({
+                    participante1: req.body.nombreUsuario,
+                    participante2: req.body.participante2,
+                    ganador: undefined,
+                    estado: "enCurso",
+                    subestado: "colocandoBarcos",
+                    tipo: "torneo",
+                    barcos1:
+                    {
+                        colocados: false,
+                        barcos:[]
+                    },
+                    barcos2:
+                    {
+                        colocados: false,
+                        barcos:[]
+                    },
+                    torneo: torneo,
+                    eliminatoria: 1,
+                });
+
+                const partida2= new Partida ({
+                    participante1: req.body.participante3,
+                    participante2: req.body.participante4,
+                    ganador: undefined,
+                    estado: "enCurso",
+                    subestado: "colocandoBarcos",
+                    tipo: "torneo",
+                    barcos1:
+                    {
+                        colocados: false,
+                        barcos:[]
+                    },
+                    barcos2:
+                    {
+                        colocados: false,
+                        barcos:[]
+                    },
+                    torneo: torneo,
+                    eliminatoria: 1,
+                });
+
+                torneo.partidas.push(partida1);
+                torneo.partidas.push(partida2);
+
+                //Añadimos torneo y partida a la base de datos
+                torneo.save(function (err) {
+                    if (err) return res.status(500).send('Error al guardar partida1 de torneo');                    
+                });
+                partida1.save(function (err) {
+                    if (err) return res.status(500).send('Error al guardar partida1 de torneo');                    
+                });
+                partida2.save(function (err) {
+                    if (err) return res.status(500).send('Error al guardar partida2 de torneo');
+                    //devolvemos Mensaje
+                    respuesta={
+                        mensaje:'El torneo ha comenzado. En tu lista de partidas encontrarás la partida que te toca jugar'
+                    }
+                    return res.send(respuesta);
+                });
+            })
+        })
+    })     
 }
