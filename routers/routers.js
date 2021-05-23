@@ -3,6 +3,8 @@ module.exports=(router) =>{
     router.post('/signin',Users.register );
     router.post('/login',Users.loginUser );
     router.post('/profile',Users.profile );
+    router.post('/cogerTableroFin',Users.cogerTableroFin);
+    router.post('/history',Users.history);
     router.use('/user',Users.autentificar);
     router.post('/user/addfriend',Users.addFriend );
     router.post('/user/friendList',Users.friendList );
@@ -14,7 +16,6 @@ module.exports=(router) =>{
     router.post('/user/me',Users.me);
     router.use('/game',Users.autentificar);
     router.post('/game/newGame',Users.newGame );
-    router.post('/history',Users.history);
     router.post('/game/ia',Users.gameIA );
     router.post('/game/friend',Users.gameFriend);
     router.post('/game/incomingRequests',Users.gameIncomingRequests);
