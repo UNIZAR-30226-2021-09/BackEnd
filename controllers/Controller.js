@@ -679,7 +679,8 @@ exports.me=(req,res)=>{
 
 exports.profile=(req,res)=>{
     User.findOne({nombreUsuario: req.body.nombreUsuario}, (err,user)=>{
-        if(err) return res.status(500).send({ mensaje:`No se ha encontrado el usuario ${req.body.nombreUsuario}`});
+        if(err)return res.status(500).send({ mensaje:`Error buscando el usuario ${req.body.nombreUsuario}`});
+        if(!user) return res.status(500).send({ mensaje:`No se ha encontrado el usuario ${req.body.nombreUsuario}`});
         User.count(
             {
                 puntos:{$gt:user.puntos}
