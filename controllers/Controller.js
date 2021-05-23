@@ -1882,6 +1882,7 @@ exports.rendirse=(req,res)=>{
     });
 }
 exports.crearTorneo=(req,res)=>{
+    console.log("crear torneo");
     User.find(
         {
             nombreUsuario:req.body.participante1,
