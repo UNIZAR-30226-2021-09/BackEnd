@@ -493,6 +493,7 @@ exports.history=(req,res)=>{
         { sort: { 'date': 'desc' }/*, limit: 10*/ },
         (err,result)=>{
         if (err) return res.status(500).send('Server error!');
+        if(!result) return res.status(500).send({ mensaje:`No se ha encontrado partidas`});
         historial = result.map(function(item){
             if(req.body.nombreUsuario==item.ganador ){
                 resultado="victoria";
