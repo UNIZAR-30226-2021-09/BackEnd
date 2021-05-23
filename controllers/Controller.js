@@ -1671,13 +1671,22 @@ exports.infoPartida=(req,res)=>{
         for(var i = 0; i < partida.tablero2.length; ++i){
             if(partida.tablero2[i].casilla.estado =="acierto" ) disparosAcertados++;
         }
+         torneo="no";
+                            if(partida.tipo=="torneo"){
+                                if(partida.eliminatoria==1){
+                                    torneo="semifinal";
+                                } else{
+                                    torneo="final";
+                                }
+                            }
         respuesta={
             infoPartida:{
                 ganador:ganador,
                 puntos:puntos,
                 disparosRealizados:disparosRealizados,
                 barcosDestruidos:barcosDestruidos,
-                disparosAcertados:disparosAcertados
+                disparosAcertados:disparosAcertados,
+                torneo:torneo
             }                              
         }
         return res.send(respuesta);
@@ -1702,13 +1711,22 @@ exports.infoPartida=(req,res)=>{
         for(var i = 0; i < partida.tablero1.length; ++i){
             if(partida.tablero1[i].casilla.estado =="acierto" ) disparosAcertados++;
         }
+         torneo="no";
+                            if(partida.tipo=="torneo"){
+                                if(partida.eliminatoria==1){
+                                    torneo="semifinal";
+                                } else{
+                                    torneo="final";
+                                }
+                            }
         respuesta={
             infoPartida:{
                 ganador:ganador,
                 puntos:puntos,
                 disparosRealizados:disparosRealizados,
                 barcosDestruidos:barcosDestruidos,
-                disparosAcertados:disparosAcertados
+                disparosAcertados:disparosAcertados,
+                torneo:torneo
             }                              
         }
         return res.send(respuesta);
