@@ -493,7 +493,6 @@ exports.history=(req,res)=>{
         { sort: { 'date': 'desc' }/*, limit: 10*/ },
         (err,result)=>{
         if (err) return res.status(500).send('Server error!');
-        if(!result) return res.status(500).send({ mensaje:`No se ha encontrado partidas`});
         historial = result.map(function(item){
             if(req.body.nombreUsuario==item.ganador ){
                 resultado="victoria";
@@ -1998,17 +1997,29 @@ exports.crearTorneo=(req,res)=>{
                 torneo.save(function (err) {
                     if (err) return res.status(500).send('Error al guardar partida1 de torneo');                    
                 });
-                partida1.save(function (err) {
+                partida1.save(function (err, p1) {
                     if (err) return res.status(500).send('Error al guardar partida1 de torneo');                    
-                });
-                partida2.save(function (err) {
+                    
+                    partida2.save(function (err, p2) {
                     if (err) return res.status(500).send('Error al guardar partida2 de torneo');
+                    
+                    
                     //devolvemos Mensaje
                     respuesta={
-                        mensaje:'El torneo ha comenzado. En tu lista de partidas encontrarás la partida que te toca jugar'
+                        mensaje:'El torneo ha comenzado. En tu lista de partidas encontrarás la partida que te toca jugar',
+                        p1:p1._id,
+                        j1:p1.participante1,
+                        j2:p1.participante2,
+                        p2:p2._id,
+                        j3:p2.participante1,
+                        j4:p2.participante2
+                        
                     }
                     return res.send(respuesta);
                 });
+                    
+                });
+                
             })
         })
     })     
