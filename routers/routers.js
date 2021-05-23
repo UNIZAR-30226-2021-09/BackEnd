@@ -14,7 +14,7 @@ module.exports=(router) =>{
     router.post('/user/me',Users.me);
     router.use('/game',Users.autentificar);
     router.post('/game/newGame',Users.newGame );
-    router.post('/game/history',Users.history);
+    router.post('/history',Users.history);
     router.post('/game/ia',Users.gameIA );
     router.post('/game/friend',Users.gameFriend);
     router.post('/game/incomingRequests',Users.gameIncomingRequests);
@@ -23,10 +23,9 @@ module.exports=(router) =>{
     router.post('/game/accept',Users.gameAccept);
     router.post('/game/dismiss',Users.gameDismiss);
     router.post('/game/random',Users.blindMatch);
-    router.post('/game/torneo',Users.crearTorneo);
     router.post('/match/colocarBarcos',Users.colocarBarcos);
     router.post('/match/movimiento',Users.disparo);
-    router.post('/match/infoPartida',Users.infoPartida);
+    router.post('/infoPartida',Users.infoPartida);
     router.post('/match/cogerTablero',Users.cogerTablero);
     router.post('/match/rendirse',Users.rendirse);
     router.use('/match',Users.autentificar);
