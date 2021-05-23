@@ -1214,7 +1214,44 @@ exports.disparo=(req,res)=>{
                 ,
                 (err,partida2) =>{
                     if (err) return res.status(500).send('Server error!');  
-                    return res.send(respuesta);
+                    if(!fin){
+                        return res.send(respuesta);
+                    }else{
+                        //HAS GANADO, actualizamos los marcadores del usuario
+                        User.findOneAndUpdate(
+                        { 
+                            nombreUsuario: req.body.nombreUsuario,
+                        },
+                        {
+                            $inc: { 'partidasGanadas':1,'puntos':respuesta.infoPartida.puntos}                
+                        },
+                        {new: true},
+                        (err,myuser) =>{
+                        if(err) return res.status(500).send('Server error!');
+                        if(!myuser)return res.status(500).send({mensaje: 'Error al actualizar los datos del usuario' });
+                        
+                        //Actualizamos los datos del rival
+                        if(partida.participante1==req.body.nombreUsuario){
+                            rival=partida.participante2;
+                        }else{
+                            rival=partida.participante1;
+                        }
+                        User.findOneAndUpdate(
+                        { 
+                            nombreUsuario: rival,
+                        },
+                        {
+                            $inc: { 'partidasPerdidas':1,'puntos':-respuesta.infoPartida.puntos}                
+                        },
+                        {new: true},
+                        (err,myuser2) =>{
+                        if(err) return res.status(500).send('Server error!');
+                        if(!myuser2)return res.status(500).send({mensaje: 'Error al actualizar los datos del rival' });
+                        
+                            return res.send(respuesta);
+                
+                        });});
+                    }
                 });
             
         }else if(partida.participante2==req.body.nombreUsuario) { 
