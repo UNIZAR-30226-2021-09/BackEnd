@@ -1222,6 +1222,15 @@ exports.disparo=(req,res)=>{
                             for(var k = 0; k < partida.tablero2.length; ++k){
                                 if(partida.tablero2[k].casilla.estado =="acierto" ) disparosAcertados++;
                             }
+                            //si es torneo, es semifinal o final?
+                            torneo="no";
+                            if(partida.tipo=="torneo"){
+                                if(partida.eliminatoria==1){
+                                    torneo="semifinal";
+                                } else{
+                                    torneo="final";
+                                }
+                            }
                             respuesta={
                                 disparo:"hundido",
                                 barco:partida.barcos2.barcos[i],
@@ -1231,7 +1240,8 @@ exports.disparo=(req,res)=>{
                                     puntos:puntos,
                                     disparosRealizados:disparosRealizados,
                                     barcosDestruidos:barcosDestruidos,
-                                    disparosAcertados:disparosAcertados
+                                    disparosAcertados:disparosAcertados,
+                                    torneo:torneo
                                 }                              
                             }
                         }else{
@@ -1476,6 +1486,15 @@ exports.disparo=(req,res)=>{
                             for(var k = 0; k < partida.tablero1.length; ++k){
                                 if(partida.tablero1[k].casilla.estado =="acierto" ) disparosAcertados++;
                             }
+                            //si es torneo, es semifinal o final?
+                            torneo="no";
+                            if(partida.tipo=="torneo"){
+                                if(partida.eliminatoria==1){
+                                    torneo="semifinal";
+                                } else{
+                                    torneo="final";
+                                }
+                            }
                             respuesta={
                                 disparo:"hundido",
                                 barco:partida.barcos1.barcos[i],
@@ -1485,7 +1504,8 @@ exports.disparo=(req,res)=>{
                                     puntos:puntos,
                                     disparosRealizados:disparosRealizados,
                                     barcosDestruidos:barcosDestruidos,
-                                    disparosAcertados:disparosAcertados
+                                    disparosAcertados:disparosAcertados,
+                                    torneo:torneo
                                 }                              
                             }
                         }else{
