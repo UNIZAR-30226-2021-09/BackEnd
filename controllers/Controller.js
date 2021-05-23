@@ -1924,7 +1924,7 @@ exports.cogerTableroFin=(req,res)=>{
         disparos=partida.tablero2;
         if(partida.subestado == "turnoJ1") turno="tuTurno";
         else turno="turnoRival";
-        barcosHundidosRival=partida.barcos2.barcos;
+        barcosRival=partida.barcos2.barcos;
     }else{
         //Tablero visible para J2
         tuTablero=partida.tablero2;
@@ -1932,7 +1932,7 @@ exports.cogerTableroFin=(req,res)=>{
         disparos=partida.tablero1;
         if(partida.subestado == "turnoJ2") turno="tuTurno";
         else turno="turnoRival";
-        barcosHundidosRival=partida.barcos1.barcos;
+        barcosRival=partida.barcos1.barcos;
     }
     respuesta={
         tuTablero:tuTablero,
