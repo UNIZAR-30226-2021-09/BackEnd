@@ -1312,7 +1312,7 @@ exports.disparo=(req,res)=>{
                        
     
                         //Actualizamos los datos del rival
-                        if(partida.tipo!=ia){
+                        if(partida.tipo!="ia"){
                             if(partida.participante1==req.body.nombreUsuario){
                                 rival=partida.participante2;
                             }else{
