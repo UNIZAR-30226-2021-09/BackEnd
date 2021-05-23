@@ -1312,29 +1312,28 @@ exports.disparo=(req,res)=>{
                        
     
                         //Actualizamos los datos del rival
-                        if(partida.tipo!="ia"){
-                            if(partida.participante1==req.body.nombreUsuario){
-                                rival=partida.participante2;
-                            }else{
-                                rival=partida.participante1;
-                            }
-                            User.findOneAndUpdate(
-                            { 
-                                nombreUsuario: rival,
-                            },
-                            {
-                                $inc: { 'partidasPerdidas':1,'puntos':-respuesta.infoPartida.puntos}                
-                            },
-                            {new: true},
-                            (err,myuser2) =>{
-                            if(err) return res.status(500).send('Server error!');
-                            if(!myuser2)return res.status(500).send({mensaje: 'Error al actualizar los datos del rival' });
-                            
-                                return res.send(respuesta);
-                    
-                            });
+                       
+                        if(partida.participante1==req.body.nombreUsuario){
+                            rival=partida.participante2;
+                        }else{
+                            rival=partida.participante1;
                         }
-                        return res.send(respuesta);
+                        User.findOneAndUpdate(
+                        { 
+                            nombreUsuario: rival,
+                        },
+                        {
+                            $inc: { 'partidasPerdidas':1,'puntos':-respuesta.infoPartida.puntos}                
+                        },
+                        {new: true},
+                        (err,myuser2) =>{
+                        if(err) return res.status(500).send('Server error!');
+                        if(!myuser2)return res.status(500).send({mensaje: 'Error al actualizar los datos del rival' });
+
+                            return res.send(respuesta);
+
+                        });
+                    
                     });
                     } else {
                         //actualizamos los marcadores del usuario
@@ -1353,26 +1352,29 @@ exports.disparo=(req,res)=>{
                        
     
                         //Actualizamos los datos del rival
-                        if(partida.participante1==req.body.nombreUsuario){
-                            rival=partida.participante2;
-                        }else{
-                            rival=partida.participante1;
+                        if(partida.tipo!="ia"){
+                            if(partida.participante1==req.body.nombreUsuario){
+                                rival=partida.participante2;
+                            }else{
+                                rival=partida.participante1;
+                            }
+                            User.findOneAndUpdate(
+                            { 
+                                nombreUsuario: rival,
+                            },
+                            {
+                                $inc: { 'partidasPerdidas':1,'puntos':-respuesta.infoPartida.puntos}                
+                            },
+                            {new: true},
+                            (err,myuser2) =>{
+                            if(err) return res.status(500).send('Server error!');
+                            if(!myuser2)return res.status(500).send({mensaje: 'Error al actualizar los datos del rival' });
+
+                                return res.send(respuesta);
+
+                            });
                         }
-                        User.findOneAndUpdate(
-                        { 
-                            nombreUsuario: rival,
-                        },
-                        {
-                            $inc: { 'partidasPerdidas':1,'puntos':-respuesta.infoPartida.puntos}                
-                        },
-                        {new: true},
-                        (err,myuser2) =>{
-                        if(err) return res.status(500).send('Server error!');
-                        if(!myuser2)return res.status(500).send({mensaje: 'Error al actualizar los datos del rival' });
-                        
-                            return res.send(respuesta);
-                
-                        });
+                        return res.send(respuesta);
                     });
                     }
                     }
