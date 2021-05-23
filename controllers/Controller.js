@@ -1334,6 +1334,7 @@ exports.disparo=(req,res)=>{
                     
                             });
                         }
+                        return res.send(respuesta);
                     });
                     } else {
                         //actualizamos los marcadores del usuario
