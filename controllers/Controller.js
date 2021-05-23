@@ -1907,6 +1907,45 @@ exports.rendirse=(req,res)=>{
     
     });
 }
+
+exports.cogerTableroFin=(req,res)=>{
+    Partida.findById(
+    {
+        _id: req.body.gameid
+    },(err,partida) =>{
+    if (err) return res.status(500).send('Server error!');
+    if(!partida) return res.status(500).send('No existe una partida con esa id');
+    if(partida.participante1!=req.body.nombreUsuario && partida.participante2!=req.body.nombreUsuario) return res.status(500).send('No perteneces a esta partida');
+    if(partida.estado!="finalizada") return res.status(500).send('La partida no ha finalizado');
+    if(partida.participante1==req.body.nombreUsuario){
+        //Tablero visible para J1
+        tuTablero=partida.tablero1;
+        tusBarcos=partida.barcos1.barcos;
+        disparos=partida.tablero2;
+        if(partida.subestado == "turnoJ1") turno="tuTurno";
+        else turno="turnoRival";
+        barcosHundidosRival=partida.barcos2.barcos;
+    }else{
+        //Tablero visible para J2
+        tuTablero=partida.tablero2;
+        tusBarcos=partida.barcos2.barcos;
+        disparos=partida.tablero1;
+        if(partida.subestado == "turnoJ2") turno="tuTurno";
+        else turno="turnoRival";
+        barcosHundidosRival=partida.barcos1.barcos;
+    }
+    respuesta={
+        tuTablero:tuTablero,
+        tusBarcos:tusBarcos,
+        disparos:disparos,
+        turno:turno,
+        barcosHundidosRival:barcosHundidosRival
+    }
+    return res.send(respuesta);
+    });
+}
+
+
 exports.crearTorneo=(req,res)=>{
     console.log("crear torneo");
     User.find(
