@@ -7,6 +7,9 @@ const Request = mongoose.model('Requests',requestSchema);
 const partidaSchema = require('../models/partidas');
 const Partida = mongoose.model('Partidas',partidaSchema);
 
+const torneoSchema = require('../models/torneo');
+const Torneo = mongoose.model('Torneo',torneoSchema);
+
 const jwt=require('jsonwebtoken');
 const bcrypt=require('bcryptjs');
 const SECRET_KEY='secretkey123456';
