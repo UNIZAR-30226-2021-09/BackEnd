@@ -2109,3 +2109,43 @@ exports.crearTorneo=(req,res)=>{
         })
     })     
 }
+
+exports.guardarToken=(req,res)=>{
+    console.log("LLLL")
+    Tokens.findOneAndUpdate(
+        { 
+            nombreUsuario: req.body.nombreUsuario
+        },
+        {
+            token:req.body.token
+        },
+        {new: true},
+        (err,token) =>{
+        if(err || !token){
+            const nuevotoken= new Tokens ({
+                nombreUsuario:req.body.nombreUsuario,
+                token:req.body.token
+            });
+            //Añadimos el token a la base de datos
+            nuevotoken.save(function (err) {
+                if (err) return res.status(500).send('Error al guardar el token');
+                return res.send(req.body.token);
+            });
+
+        }else{
+            return res.send(req.body.token);
+        }
+    });
+}
+
+exports.cogerToken=(req,res)=>{
+    Tokens.findOne(
+        { 
+            nombreUsuario: req.body.nombreUsuario
+        },
+        (err,token) =>{
+        if(err || !token)return res.status(500).send('No existe un token par ese usuario');
+        return res.send(token.token);
+    });
+}
+
