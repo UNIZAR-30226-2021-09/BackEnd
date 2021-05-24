@@ -11,7 +11,7 @@ const torneoSchema = require('../models/torneo');
 const Torneo = mongoose.model('Torneo',torneoSchema);
 
 const mySockets = require('./sockets');
-const socket = require('../app');//import object
+const socket = require('../index');//import object
 
 const jwt=require('jsonwebtoken');
 const bcrypt=require('bcryptjs');
