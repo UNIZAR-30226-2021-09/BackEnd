@@ -30,3 +30,6 @@ router.get('/', (req, res)=>{
 
 app.use(router);
 server.listen(properties.PORT,()=> console.log(`server running on port ${properties.PORT}`));
+
+const socketIoObject = io;
+module.exports.ioObject = socketIoObject;
