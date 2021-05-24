@@ -4,8 +4,8 @@ module.exports=(router) =>{
     router.post('/login',Users.loginUser );
     router.post('/profile',Users.profile );
     router.post('/cogerTableroFin',Users.cogerTableroFin);
-    router.post('/guardarToken',Users.guardarToken);
-    router.post('/cogerToken',Users.cogerToken);
+    router.post('/setToken',Users.guardarToken);
+    router.post('/getToken',Users.cogerToken);
     router.post('/history',Users.history);
     router.use('/user',Users.autentificar);
     router.post('/user/addfriend',Users.addFriend );
