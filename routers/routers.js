@@ -17,7 +17,7 @@ module.exports=(router) =>{
     router.post('/user/ranking',Users.ranking);
     router.post('/user/me',Users.me);
     router.use('/game',Users.autentificar);
-    router.post('/game/newGame',Users.newGame );
+    router.post('/game/newGame',Users.newGame ); 
     router.post('/game/ia',Users.gameIA );
     router.post('/game/friend',Users.gameFriend);
     router.post('/game/incomingRequests',Users.gameIncomingRequests);
