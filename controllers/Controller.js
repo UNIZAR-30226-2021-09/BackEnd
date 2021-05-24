@@ -1204,12 +1204,13 @@ exports.disparo=(req,res)=>{
                                                 result[0].estado = "enCurso";
                                                 result[0].save(function (err, final) {
                                                     if (err) return res.status(500).send('Error al actualiza final de torneo');
-                                                    console.log(mySockets.getUserSockets());
-                                                    let friendSocket1 = mySockets.getUserSockets().get(final.participante1.toString());                                                    
+                                                    var socketMap = mySockets.userSockets;
+                                                    console.log(socketMap);
+                                                    let friendSocket1 = socketMap.get(final.participante1.toString());                                                    
                                                     console.log(friendSocket1);
                                                     socket.to(friendSocket1).emit("llegaAceptarChallenge", final._id);
                                                     console.log("despues de emit llegaAceptarChallenge final");                    
-                                                    let friendSocket2 = mySockets.getUserSockets().get(final.participante2.toString());                                                    
+                                                    let friendSocket2 = socketMap.get(final.participante2.toString());                                                    
                                                     console.log(friendSocket2);
                                                     socket.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
                                                     console.log("despues de emit llegaAceptarChallenge final");                       
@@ -1481,12 +1482,13 @@ exports.disparo=(req,res)=>{
                                                 result[0].estado = "enCurso";
                                                 result[0].save(function (err, final) {
                                                     if (err) return res.status(500).send('Error al actualiza final de torneo');
-                                                    console.log(mySockets.getUserSockets());
-                                                    let friendSocket1 = mySockets.getUserSockets().get(final.participante1.toString());                                                    
+                                                    var socketMap = mySockets.userSockets;
+                                                    console.log(socketMap);
+                                                    let friendSocket1 = socketMap.get(final.participante1.toString());                                                    
                                                     console.log(friendSocket1);
                                                     socket.to(friendSocket1).emit("llegaAceptarChallenge", final._id);
                                                     console.log("despues de emit llegaAceptarChallenge final");                    
-                                                    let friendSocket2 = mySockets.getUserSockets().get(final.participante2.toString());                                                    
+                                                    let friendSocket2 = socketMap.get(final.participante2.toString());                                                    
                                                     console.log(friendSocket2);
                                                     socket.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
                                                     console.log("despues de emit llegaAceptarChallenge final");                    
