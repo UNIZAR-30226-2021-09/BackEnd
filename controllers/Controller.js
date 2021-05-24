@@ -2115,7 +2115,7 @@ exports.crearTorneo=(req,res)=>{
 
 exports.guardarToken=(req,res)=>{
     console.log("LLLL")
-    Tokens.findOneAndUpdate(
+    /*Tokens.findOneAndUpdate(
         { 
             nombreUsuario: req.body.nombreUsuario
         },
@@ -2138,17 +2138,17 @@ exports.guardarToken=(req,res)=>{
         }else{
             return res.send(req.body.token);
         }
-    });
+    });*/
 }
 
 exports.cogerToken=(req,res)=>{
-    Tokens.findOne(
+    /*Tokens.findOne(
         { 
             nombreUsuario: req.body.nombreUsuario
         },
         (err,token) =>{
         if(err || !token)return res.status(500).send('No existe un token par ese usuario');
         return res.send(token.token);
-    });
+    });*/
 }
 
