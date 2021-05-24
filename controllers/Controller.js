@@ -10,6 +10,9 @@ const Partida = mongoose.model('Partidas',partidaSchema);
 const torneoSchema = require('../models/torneo');
 const Torneo = mongoose.model('Torneo',torneoSchema);
 
+const mySockets = require('./sockets');
+var socketMap = mySockets.userSockets;
+
 const jwt=require('jsonwebtoken');
 const bcrypt=require('bcryptjs');
 const SECRET_KEY='secretkey123456';
@@ -1174,7 +1177,7 @@ exports.disparo=(req,res)=>{
                                                 const final= new Partida ({
                                                     participante1: req.body.nombreUsuario,
                                                     ganador: undefined,
-                                                    estado: "enCurso",
+                                                    estado: "pendiente",
                                                     subestado: "colocandoBarcos",
                                                     tipo: "torneo",
                                                     barcos1:
@@ -1199,8 +1202,17 @@ exports.disparo=(req,res)=>{
                                                 console.log("segundo en ganar")
                                                 console.log(result)
                                                 result[0].participante2 = req.body.nombreUsuario;
-                                                result[0].save(function (err) {
-                                                    if (err) return res.status(500).send('Error al actualiza final de torneo');                    
+                                                result[0].estado = "enCurso";
+                                                result[0].save(function (err, final) {
+                                                    if (err) return res.status(500).send('Error al actualiza final de torneo');
+                                                    let friendSocket1 = socketMap.get(final.participante1.toString());                                                    
+                                                    console.log(friendSocket1);
+                                                    socket.to(friendSocket1).emit("llegaAceptarChallenge", final._id);
+                                                    console.log("despues de emit llegaAceptarChallenge final");                    
+                                                    let friendSocket2 = socketMap.get(final.participante2.toString());                                                    
+                                                    console.log(friendSocket2);
+                                                    socket.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
+                                                    console.log("despues de emit llegaAceptarChallenge final");                       
                                                 });
                                             }
                                         }
@@ -1441,7 +1453,7 @@ exports.disparo=(req,res)=>{
                                                 const final= new Partida ({
                                                     participante1: req.body.nombreUsuario,
                                                     ganador: undefined,
-                                                    estado: "enCurso",
+                                                    estado: "pendiente",
                                                     subestado: "colocandoBarcos",
                                                     tipo: "torneo",
                                                     barcos1:
@@ -1466,8 +1478,17 @@ exports.disparo=(req,res)=>{
                                                 console.log("segundo en ganar")
                                                 console.log(result)
                                                 result[0].participante2 = req.body.nombreUsuario;
-                                                result[0].save(function (err) {
-                                                    if (err) return res.status(500).send('Error al actualiza final de torneo');                    
+                                                result[0].estado = "enCurso";
+                                                result[0].save(function (err, final) {
+                                                    if (err) return res.status(500).send('Error al actualiza final de torneo');
+                                                    let friendSocket1 = socketMap.get(final.participante1.toString());                                                    
+                                                    console.log(friendSocket1);
+                                                    socket.to(friendSocket1).emit("llegaAceptarChallenge", final._id);
+                                                    console.log("despues de emit llegaAceptarChallenge final");                    
+                                                    let friendSocket2 = socketMap.get(final.participante2.toString());                                                    
+                                                    console.log(friendSocket2);
+                                                    socket.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
+                                                    console.log("despues de emit llegaAceptarChallenge final");                    
                                                 });
                                             }
                                         }
