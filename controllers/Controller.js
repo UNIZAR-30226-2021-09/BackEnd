@@ -1206,7 +1206,7 @@ exports.disparo=(req,res)=>{
                                                     if (err) return res.status(500).send('Error al actualiza final de torneo');
                                                     
                                                     console.log(userSockets);
-                                                    let friendSocket1 = usarSockets.get(final.participante1.toString());                                                    
+                                                    let friendSocket1 = userSockets.get(final.participante1.toString());                                                    
                                                     console.log(friendSocket1);
                                                     socket.to(friendSocket1).emit("llegaAceptarChallenge", final._id);
                                                     console.log("despues de emit llegaAceptarChallenge final");                    
