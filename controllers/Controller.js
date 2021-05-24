@@ -1209,11 +1209,11 @@ exports.disparo=(req,res)=>{
                                                     console.log(userSockets);
                                                     let friendSocket1 = userSockets.get(final.participante1.toString());                                                    
                                                     console.log(friendSocket1);
-                                                    socket.ioObject.socket(friendSocket1).emit("llegaAceptarChallenge", final._id);
+                                                    socket.ioObject.to(friendSocket1).emit("llegaAceptarChallenge", final._id);
                                                     console.log("despues de emit llegaAceptarChallenge final");                    
                                                     let friendSocket2 = userSockets.get(final.participante2.toString());                                                    
                                                     console.log(friendSocket2);
-                                                    socket.ioObject.socket(friendSocket2).emit("llegaAceptarChallenge", final._id);
+                                                    socket.ioObject.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
                                                     console.log("despues de emit llegaAceptarChallenge final");                       
                                                 });
                                             }
@@ -1487,11 +1487,11 @@ exports.disparo=(req,res)=>{
                                                     console.log(userSockets);
                                                     let friendSocket1 = userSockets.get(final.participante1.toString());                                                    
                                                     console.log(friendSocket1);
-                                                    socket.ioObject.socket(friendSocket1).emit("llegaAceptarChallenge", final._id);
+                                                    socket.ioObject.to(friendSocket1).emit("llegaAceptarChallenge", final._id);
                                                     console.log("despues de emit llegaAceptarChallenge final");                    
                                                     let friendSocket2 = userSockets.get(final.participante2.toString());                                                    
                                                     console.log(friendSocket2);
-                                                    socket.ioObject.socket(friendSocket2).emit("llegaAceptarChallenge", final._id);
+                                                    socket.ioObject.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
                                                     console.log("despues de emit llegaAceptarChallenge final");                    
                                                 });
                                             }
