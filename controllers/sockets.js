@@ -10,6 +10,10 @@ const Partida = mongoose.model('Partidas',partidaSchema);
 
 var userSockets = new Map();
 
+exports.getUserSockets=() => {
+  return userSockets;
+}
+
 module.exports = function(io) {
 
   // socket connection
