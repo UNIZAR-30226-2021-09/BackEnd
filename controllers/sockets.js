@@ -8,9 +8,7 @@ const Request = mongoose.model('Requests',requestSchema);
 const partidaSchema = require('../models/partidas');
 const Partida = mongoose.model('Partidas',partidaSchema);
 
-var userSockets = new Map();
-
-exports.userSockets = userSockets;
+userSockets = new Map();
 
 module.exports = function(io) {
 
