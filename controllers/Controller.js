@@ -10,6 +10,9 @@ const Partida = mongoose.model('Partidas',partidaSchema);
 const torneoSchema = require('../models/torneo');
 const Torneo = mongoose.model('Torneo',torneoSchema);
 
+const tokenSchema = require('../models/tokens');
+const Tokens = mongoose.model('Tokens',tokenSchema);
+
 const mySockets = require('./sockets');
 const socket = require('../index');//import object
 
