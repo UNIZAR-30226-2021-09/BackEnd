@@ -4,6 +4,8 @@ module.exports=(router) =>{
     router.post('/login',Users.loginUser );
     router.post('/profile',Users.profile );
     router.post('/cogerTableroFin',Users.cogerTableroFin);
+    router.post('/guardarToken',Users.guardarToken);
+    router.post('/cogerToken',Users.cogerToken);
     router.post('/history',Users.history);
     router.use('/user',Users.autentificar);
     router.post('/user/addfriend',Users.addFriend );
@@ -24,12 +26,11 @@ module.exports=(router) =>{
     router.post('/game/accept',Users.gameAccept);
     router.post('/game/dismiss',Users.gameDismiss);
     router.post('/game/random',Users.blindMatch);
-    router.post('/game/torneo',Users.crearTorneo);
     router.post('/match/colocarBarcos',Users.colocarBarcos);
     router.post('/match/movimiento',Users.disparo);
     router.post('/infoPartida',Users.infoPartida);
     router.post('/match/cogerTablero',Users.cogerTablero);
-    router.post('/match/rendirse',Users.rendirse);
+    router.post('/match/rendirse',Users.rendirse); 
     router.use('/match',Users.autentificar);
 
 }
