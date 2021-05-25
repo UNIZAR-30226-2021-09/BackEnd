@@ -42,8 +42,8 @@ io.on("connection", (socket) => {
 		transporter.sendMail({
 		from:'"ps09" <ps09unizar@gmail.com>',
 		to: user.email,
-		subject: user.nombreUsuario + ' tienes una nueva petición de amistad!',
-		html:`<b>Inicia sesión para aceptarla o rechazarla</b>
+		subject: user.nombreUsuario + ', tienes una nueva petición de amistad!',
+		html:`<b>Inicia sesión para aceptarla o rechazarla </b>
 	    	<a href="https://keen-thompson-0eaf88.netlify.app/">https://keen-thompson-0eaf88.netlify.app/</a>`
 	})
 	}
@@ -65,6 +65,24 @@ io.on("connection", (socket) => {
     console.log("llega desafio de" + user.nombreUsuario.toString());
     console.log(friendSocket);
     socket.to(friendSocket).emit("llegaChallenge");
+	  
+     User.findOne({nombreUsuario: user.nombreUsuario.toString()}, (err,user)=>{
+        if(err) return res.status(500).send({ mensaje:'Server error!'});
+        
+        if(!user){
+            // No existe el email
+            return res.status(409).send({mensaje: 'Something is wrong'});
+        } else{
+		transporter.sendMail({
+		from:'"ps09" <ps09unizar@gmail.com>',
+		to: user.email,
+		subject: user.nombreUsuario + ', te han retado!!',
+		html:`<b>Inicia sesión para aceptar o rechazar </b>
+	    	<a href="https://keen-thompson-0eaf88.netlify.app/">https://keen-thompson-0eaf88.netlify.app/</a>`
+	})
+	}
+    })
+	  
   })
   
   socket.on("aceptarChallenge", (user) => {
