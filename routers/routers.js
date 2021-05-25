@@ -2,7 +2,6 @@ const Users = require('../controllers/Controller');
 module.exports=(router) =>{
     router.post('/signin',Users.register );
     router.post('/login',Users.loginUser );
-    router.post('/login2',Users.loginUser2 );
     router.post('/profile',Users.profile );
     router.post('/cogerTableroFin',Users.cogerTableroFin);
     router.post('/setToken',Users.guardarToken);
