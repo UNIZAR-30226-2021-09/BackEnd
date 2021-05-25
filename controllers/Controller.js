@@ -1223,6 +1223,7 @@ exports.disparo=(req,res)=>{
                                                     socket.ioObject.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
                                                     console.log("despues de emit llegaAceptarChallenge final");                       
                                                 });
+												handlePushTokens(final.participante1, ""You've got a new game"", "Tournament (Final) with " + req.body.nombreUsuario);
                                             }
                                         }
                                     )
@@ -2098,7 +2099,10 @@ exports.crearTorneo=(req,res)=>{
                     partida2.save(function (err, p2) {
                     if (err) return res.status(500).send('Error al guardar partida2 de torneo');
                     
-                    
+                    handlePushTokens(req.body.participante2, ""You've got a new game"", "Tournament with " + req.body.nombreUsuario);
+                    handlePushTokens(req.body.participante3, ""You've got a new game"", "Tournament with " + req.body.participante4);
+                    handlePushTokens(req.body.participante4, ""You've got a new game"", "Tournament with " + req.body.participante3);
+
                     //devolvemos Mensaje
                     respuesta={
                         mensaje:'El torneo ha comenzado. En tu lista de partidas encontrarás la partida que te toca jugar',
