@@ -2157,14 +2157,14 @@ exports.cogerToken=(req,res)=>{
 }
 
 function handlePushTokens (username, title, body) {
-    var device;
+    var device="";
     Tokens.findOne(
         { 
             nombreUsuario: username
         },
         (err,token) =>{
         if(err || !token) console.log("error handlePushTokens");
-        else device = token;
+        else device = token.token;
     });
         console.log("handlePushTokens"+device);
 
