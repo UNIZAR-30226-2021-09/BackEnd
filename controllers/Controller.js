@@ -2098,7 +2098,7 @@ exports.crearTorneo=(req,res)=>{
                     
                     partida2.save(function (err, p2) {
                     if (err) return res.status(500).send('Error al guardar partida2 de torneo');
-                    
+                    console.log("Torneo correcto")
                     handlePushTokens(req.body.participante2, "You've got a new game", "Tournament with " + req.body.nombreUsuario);
                     handlePushTokens(req.body.participante3, "You've got a new game", "Tournament with " + req.body.participante4);
                     handlePushTokens(req.body.participante4, "You've got a new game", "Tournament with " + req.body.participante3);
@@ -2187,7 +2187,7 @@ function handlePushTokens (username, title, body) {
                 let receipts = await expo.sendPushNotificationsAsync(chunk);
                 console.log(receipts);
               } catch (error) {
-                console.error(error);
+                console.log(error);
               }
             }
             })();
