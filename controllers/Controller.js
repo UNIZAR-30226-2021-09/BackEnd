@@ -1221,9 +1221,10 @@ exports.disparo=(req,res)=>{
                                                     let friendSocket2 = userSockets.get(final.participante2.toString());                                                    
                                                     console.log(friendSocket2);
                                                     socket.ioObject.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
-                                                    console.log("despues de emit llegaAceptarChallenge final");                       
+                                                    console.log("despues de emit llegaAceptarChallenge final");  
+							handlePushTokens(final.participante1, "You've got a new game", "Tournament(Final) with " + req.body.nombreUsuario);
                                                 });
-												handlePushTokens(final.participante1, "You've got a new game", "Tournament(Final) with " + req.body.nombreUsuario);
+												
                                             }
                                         }
                                     )
@@ -1502,7 +1503,8 @@ exports.disparo=(req,res)=>{
                                                     let friendSocket2 = userSockets.get(final.participante2.toString());                                                    
                                                     console.log(friendSocket2);
                                                     socket.ioObject.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
-                                                    console.log("despues de emit llegaAceptarChallenge final");                    
+                                                    console.log("despues de emit llegaAceptarChallenge final"); 
+							handlePushTokens(final.participante1, "You've got a new game", "Tournament(Final) with " + req.body.nombreUsuario);
                                                 });
                                             }
                                         }
@@ -1885,8 +1887,9 @@ exports.rendirse=(req,res)=>{
                                                     console.log(friendSocket2);
                                                     socket.ioObject.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
                                                     console.log("despues de emit llegaAceptarChallenge final");                       
+							handlePushTokens(final.participante1, "You've got a new game", "Tournament(Final) with " + req.body.nombreUsuario);
                                                 });
-												handlePushTokens(final.participante1, "You've got a new game", "Tournament(Final) with " + req.body.nombreUsuario);
+												
                                             }
                                         }
                                     )
@@ -2018,7 +2021,8 @@ exports.rendirse=(req,res)=>{
                                                     let friendSocket2 = userSockets.get(final.participante2.toString());                                                    
                                                     console.log(friendSocket2);
                                                     socket.ioObject.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
-                                                    console.log("despues de emit llegaAceptarChallenge final");                    
+                                                    console.log("despues de emit llegaAceptarChallenge final");  
+							handlePushTokens(final.participante1, "You've got a new game", "Tournament(Final) with " + req.body.nombreUsuario);
                                                 });
                                             }
                                         }
