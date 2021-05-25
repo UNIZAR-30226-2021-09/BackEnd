@@ -8,6 +8,9 @@ const Request = mongoose.model('Requests',requestSchema);
 const partidaSchema = require('../models/partidas');
 const Partida = mongoose.model('Partidas',partidaSchema);
 
+const User = require('../dataAccess/DataAccess');
+const mongoose = require('mongoose');
+
 require('./authController');
 
 userSockets = new Map();
@@ -25,54 +28,30 @@ io.on("connection", (socket) => {
   })
 
   //Redirigir peticion de amistad
-  socket.on("friendPetition", (user) => {
-	  console.log("hola");
+  socket.on("friendPetition", (user) => {	  
     let friendSocket = userSockets.get(user.nombreUsuario.toString());
     console.log("llega peticion de amistad" + user.nombreUsuario.toString());
     console.log(friendSocket);
-    if(typeof friendSocket === 'undefined'){
-        console.log("must send")
-        transporter.sendMail({
-        from:'"ps09" <ps09unizar@gmail.com>',
-        to:'theheroshadexd@gmail.com',
-        subject:'Tienes una nueva petición de amistad!',
-        html:`<b>Inicia sesión para aceptarla o rechazarla</b>
-            <a href="https://keen-thompson-0eaf88.netlify.app/">https://keen-thompson-0eaf88.netlify.app/</a>`
-      })
-    }
-    else{
-      mustSend=true;
-      for (let s of io.of('/').sockets) {
-	let sckt = s[1];
-        console.log(sckt.id);
-	if(sckt.id === friendSocket){
-          sckt.emit("llegaInvitacion", () => {
-	  	mustSend = false
-		console.log(mustSend);
-		console.log("tiene que valer falso");
-	  }
-          
-          );
+	  
+    socket.to(friendSocket).emit("llegaInvitacion");
+
+    User.findOne({nombreUsuario: user.nombreUsuario.toString()}, (err,user)=>{
+        if(err) return res.status(500).send({ mensaje:'Server error!'});
+        
+        if(!user){
+            // No existe el email
+            return res.status(409).send({mensaje: 'Something is wrong'});
+        } else{
+		transporter.sendMail({
+		from:'"ps09" <ps09unizar@gmail.com>',
+		to: user.email,
+		subject: user.nombreUsuario + ' tienes una nueva petición de amistad!',
+		html:`<b>Inicia sesión para aceptarla o rechazarla</b>
+	    	<a href="https://keen-thompson-0eaf88.netlify.app/">https://keen-thompson-0eaf88.netlify.app/</a>`
+	})
+	}
+    })
 	
-        }
-      }
-      console.log(mustSend);
-      
-      if(mustSend){
-        console.log("must send")
-        transporter.sendMail({
-          from:'"hola" <ps09unizar@gmail.com>',
-          to:'theheroshadexd@gmail.com',
-          subject:'Tienes una nueva petición de amistad!',
-          html:`<b>Inicia sesión para aceptarla o rechazarla</b>
-              <a href="https://keen-thompson-0eaf88.netlify.app/">https://keen-thompson-0eaf88.netlify.app/</a>`
-        })
-      }
-      console.log(mustSend);  
-    }
-    console.log(friendSocket);
-    
-    
     
   })
   
