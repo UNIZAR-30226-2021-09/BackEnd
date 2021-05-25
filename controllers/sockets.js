@@ -29,10 +29,9 @@ io.on("connection", (socket) => {
     let friendSocket = userSockets.get(user.nombreUsuario.toString());
     console.log("llega peticion de amistad" + user.nombreUsuario.toString());
     console.log(friendSocket);
-    socket.to(friendSocket).emit("llegaInvitacion");
     
     mustSend=true;
-    socket.to(friendSocket).emit("llegaInvitacion", () => 
+    io.sockets.connected[friendSocket].emit("llegaInvitacion", () => 
       mustSend = false
     );
     if(mustSend){
