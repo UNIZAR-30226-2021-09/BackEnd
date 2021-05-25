@@ -31,9 +31,9 @@ io.on("connection", (socket) => {
     console.log(friendSocket);
     socket.to(friendSocket).emit("llegaInvitacion");
     
-    mustSend=false;
+    mustSend=true;
     socket.to(friendSocket).emit("llegaInvitacion", () => 
-      mustSend = true
+      mustSend = false
     );
     if(mustSend){
       console.log("must send")
