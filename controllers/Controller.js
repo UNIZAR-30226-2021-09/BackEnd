@@ -2171,12 +2171,13 @@ function handlePushTokens (username, title, body) {
       return "Error";
     }
     var notifications = [{
-      to: pushToken,
+      to: device,
       sound: "default",
       title: title,
       body: body,
       data: { body }
     }]
+    console.log("handlePushTokens"+device);
     var chunks = expo.chunkPushNotifications(notifications);
     (async () => {
     // Send the chunks to the Expo push notification service. There are
