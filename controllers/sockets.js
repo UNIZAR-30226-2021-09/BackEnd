@@ -30,16 +30,8 @@ io.on("connection", (socket) => {
     console.log("llega peticion de amistad" + user.nombreUsuario.toString());
     console.log(friendSocket);
     if(typeof friendSocket === 'undefined'){
-        friendSocket=""
-       }
-    console.log(friendSocket);
-    mustSend=true;
-    io.sockets.connected[friendSocket].emit("llegaInvitacion", () => 
-      mustSend = false
-    );
-    if(mustSend){
-      console.log("must send")
-      transporter.sendMail({
+        console.log("must send")
+        transporter.sendMail({
         from:'"hola" <ps09unizar@gmail.com>',
         to:'theheroshadexd@gmail.com',
         subject:'Tienes una nueva petición de amistad!',
@@ -47,7 +39,25 @@ io.on("connection", (socket) => {
             <a href="https://keen-thompson-0eaf88.netlify.app/">https://keen-thompson-0eaf88.netlify.app/</a>`
       })
     }
-    console.log(mustSend);
+    else{
+      mustSend=true;
+      io.sockets.connected[friendSocket].emit("llegaInvitacion", () => 
+        mustSend = false
+      );
+      if(mustSend){
+        console.log("must send")
+        transporter.sendMail({
+          from:'"hola" <ps09unizar@gmail.com>',
+          to:'theheroshadexd@gmail.com',
+          subject:'Tienes una nueva petición de amistad!',
+          html:`<b>Inicia sesión para aceptarla o rechazarla</b>
+              <a href="https://keen-thompson-0eaf88.netlify.app/">https://keen-thompson-0eaf88.netlify.app/</a>`
+        })
+      }
+      console.log(mustSend);  
+    }
+    console.log(friendSocket);
+    
     
     
   })
