@@ -29,7 +29,7 @@ io.on("connection", (socket) => {
     let friendSocket = userSockets.get(user.nombreUsuario.toString());
     console.log("llega peticion de amistad" + user.nombreUsuario.toString());
     console.log(friendSocket);
-    if(typeof friendSocket === 'undefined){
+    if(typeof friendSocket === 'undefined'){
         friendSocket=""
        }
     console.log(friendSocket);
