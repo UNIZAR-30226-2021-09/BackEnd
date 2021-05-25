@@ -2168,7 +2168,7 @@ function handlePushTokens (username, title, body) {
     });
     if (!Expo.isExpoPushToken(device)) {
       console.log(`Push token ${device} is not a valid Expo push token`);
-      continue;
+      return "Error";
     }
     var notifications = [{
       to: pushToken,
