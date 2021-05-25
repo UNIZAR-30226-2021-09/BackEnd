@@ -192,7 +192,7 @@ exports.addFriend=(req,res)=>{
         Request.find({solicitante: req.body.nombreUsuario},(err,result)=>{
             if (err) return res.status(500).send({ mensaje:'Server error!'});
             oReq =new Object(result.map(a => a.solicitado));
-            handlePushTokens(req.body.nombreAmigo, "You've got a new request", req.body.nombreUsuario+"want to be your friend");
+            handlePushTokens(req.body.nombreAmigo, "You've got a new request", req.body.nombreUsuario+" want to be your friend");
             return res.send(oReq);
         });
     });
@@ -403,7 +403,7 @@ exports.gameFriend=(req,res)=>{
     partida.save(function (err) {
         if (err) return res.status(500).send('Error en la petición');
         //devolvemos la lista de solicitudes pendientes
-        handlePushTokens(req.body.nombreAmigo, "You've got a new request", "Challenge from" + req.body.nombreUsuario);
+        handlePushTokens(req.body.nombreAmigo, "You've got a new request", "Challenge from " + req.body.nombreUsuario);
         return res.send(partida);
     });});
 }
@@ -1572,6 +1572,7 @@ exports.disparo=(req,res)=>{
                         estado: "fallo"
                     }
                 });
+                handlePushTokens(req.body.nombreAmigo, "It's your turn", req.body.nombreUsuario+" has failed");
                 respuesta={disparo:"fallo",fin:false};
             }
             Partida.findByIdAndUpdate( 
@@ -2145,13 +2146,6 @@ exports.guardarToken=(req,res)=>{
             return res.send(req.body.token);
         }
     });
-}
-
-exports.cogerToken=(req,res)=>{
-    return handlePushTokens(req.body.nombreUsuario, "mensaje", "de prueba");    
-
-    
-    return "Ok";
 }
 
 function handlePushTokens (username, title, body) {
