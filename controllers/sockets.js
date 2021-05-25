@@ -32,7 +32,7 @@ io.on("connection", (socket) => {
     if(typeof friendSocket === 'undefined'){
         console.log("must send")
         transporter.sendMail({
-        from:'"hola" <ps09unizar@gmail.com>',
+        from:'"ps09" <ps09unizar@gmail.com>',
         to:'theheroshadexd@gmail.com',
         subject:'Tienes una nueva petición de amistad!',
         html:`<b>Inicia sesión para aceptarla o rechazarla</b>
