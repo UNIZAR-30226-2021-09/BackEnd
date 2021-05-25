@@ -42,18 +42,20 @@ io.on("connection", (socket) => {
     else{
       mustSend=true;
       for (let s of io.of('/').sockets) {
-	      let sckt = s[1];
+	let sckt = s[1];
         console.log(sckt.id);
-	      if(sckt.id === friendSocket){
+	if(sckt.id === friendSocket){
           sckt.emit("llegaInvitacion", () => {
 	  	mustSend = false
 		console.log(mustSend);
+		console.log("tiene que valer falso");
 	  }
           
           );
-	console.log(mustSend);
+	
         }
       }
+      console.log(mustSend);
       
       if(mustSend){
         console.log("must send")
