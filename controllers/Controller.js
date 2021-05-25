@@ -1827,6 +1827,73 @@ exports.rendirse=(req,res)=>{
     if(partida.participante1!=req.body.nombreUsuario && partida.participante2!=req.body.nombreUsuario) return res.status(500).send('No perteneces a esta partida');
     if(partida.participante1==req.body.nombreUsuario){
         
+	 if(partida.tipo == "torneo"){
+                                console.log("partida de torneo ganada por j1")
+                                console.log(partida.eliminatoria)
+                                if(partida.eliminatoria == 1){
+                                    console.log("es semifinal")
+                                    console.log("partida.torneo")
+                                    Partida.find(
+                                        {
+                                            torneo:partida.torneo,
+                                            eliminatoria: 2
+                                        },
+                                        (err,result)=>{
+                                            if (err) return res.status(500).send('Server Error');
+                                            if(result.length === 0){
+                                                console.log("primero en ganar")
+                                                
+                                                //los otros dos contendientes no han terminado, creamos la partida
+                                                const final= new Partida ({
+                                                    participante1: req.body.nombreUsuario,
+                                                    ganador: undefined,
+                                                    estado: "pendiente",
+                                                    subestado: "colocandoBarcos",
+                                                    tipo: "torneo",
+                                                    barcos1:
+                                                    {
+                                                        colocados: false,
+                                                        barcos:[]
+                                                    },
+                                                    barcos2:
+                                                    {
+                                                        colocados: false,
+                                                        barcos:[]
+                                                    },
+                                                    torneo: partida.torneo,
+                                                    eliminatoria: 2,
+                                                });
+
+                                                final.save(function (err) {
+                                                    if (err) return res.status(500).send('Error al guardar final de torneo');                    
+                                                });
+                                            }
+                                            else{
+                                                console.log("segundo en ganar")
+                                                console.log(result)
+                                                result[0].participante2 = req.body.nombreUsuario;
+                                                result[0].estado = "enCurso";
+                                                result[0].save(function (err, final) {
+                                                    if (err) return res.status(500).send('Error al actualiza final de torneo');
+                                                    
+                                                    console.log(userSockets);
+                                                    let friendSocket1 = userSockets.get(final.participante1.toString());                                                    
+                                                    console.log(friendSocket1);
+                                                    socket.ioObject.to(friendSocket1).emit("llegaAceptarChallenge", final._id);
+                                                    console.log("despues de emit llegaAceptarChallenge final");                    
+                                                    let friendSocket2 = userSockets.get(final.participante2.toString());                                                    
+                                                    console.log(friendSocket2);
+                                                    socket.ioObject.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
+                                                    console.log("despues de emit llegaAceptarChallenge final");                       
+                                                });
+												handlePushTokens(final.participante1, "You've got a new game", "Tournament(Final) with " + req.body.nombreUsuario);
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+	    
+	    
         //Estadisticas de partida del J1
         partida.ganador=partida.participante2;
         ganador=false;
@@ -1894,6 +1961,72 @@ exports.rendirse=(req,res)=>{
         return res.send(respuesta);
         });
     }else{
+	    
+	if(partida.tipo == "torneo"){
+                                console.log("partida de torneo ganada por j2")
+                                console.log(partida.eliminatoria)
+                                if(partida.eliminatoria == 1){
+                                    console.log("es semifinal")
+                                    Partida.find(
+                                        {
+                                            torneo:partida.torneo,
+                                            eliminatoria: 2
+                                        },
+                                        (err,result)=>{
+                                            if (err) return res.status(500).send('Server Error');
+                                            if(result.length === 0){
+                                                console.log("primero en ganar")
+                                                
+                                                //los otros dos contendientes no han terminado, creamos la partida
+                                                const final= new Partida ({
+                                                    participante1: req.body.nombreUsuario,
+                                                    ganador: undefined,
+                                                    estado: "pendiente",
+                                                    subestado: "colocandoBarcos",
+                                                    tipo: "torneo",
+                                                    barcos1:
+                                                    {
+                                                        colocados: false,
+                                                        barcos:[]
+                                                    },
+                                                    barcos2:
+                                                    {
+                                                        colocados: false,
+                                                        barcos:[]
+                                                    },
+                                                    torneo: partida.torneo,
+                                                    eliminatoria: 2,
+                                                });
+
+                                                final.save(function (err) {
+                                                    if (err) return res.status(500).send('Error al guardar final de torneo');                    
+                                                });
+                                            }
+                                            else{
+                                                console.log("segundo en ganar")
+                                                console.log(result)
+                                                result[0].participante2 = req.body.nombreUsuario;
+                                                result[0].estado = "enCurso";
+                                                result[0].save(function (err, final) {
+                                                    if (err) return res.status(500).send('Error al actualiza final de torneo');
+                                                    
+                                                    console.log(userSockets);
+                                                    let friendSocket1 = userSockets.get(final.participante1.toString());                                                    
+                                                    console.log(friendSocket1);
+                                                    socket.ioObject.to(friendSocket1).emit("llegaAceptarChallenge", final._id);
+                                                    console.log("despues de emit llegaAceptarChallenge final");                    
+                                                    let friendSocket2 = userSockets.get(final.participante2.toString());                                                    
+                                                    console.log(friendSocket2);
+                                                    socket.ioObject.to(friendSocket2).emit("llegaAceptarChallenge", final._id);
+                                                    console.log("despues de emit llegaAceptarChallenge final");                    
+                                                });
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+	    
+	    
         //Estadisticas de partida del J2
         partida.ganador=partida.participante1;
         ganador=false;
