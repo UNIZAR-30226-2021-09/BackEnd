@@ -8,6 +8,8 @@ const Request = mongoose.model('Requests',requestSchema);
 const partidaSchema = require('../models/partidas');
 const Partida = mongoose.model('Partidas',partidaSchema);
 
+require('./authController');
+
 userSockets = new Map();
 
 module.exports = function(io) {
@@ -28,6 +30,24 @@ io.on("connection", (socket) => {
     console.log("llega peticion de amistad" + user.nombreUsuario.toString());
     console.log(friendSocket);
     socket.to(friendSocket).emit("llegaInvitacion");
+    
+    mustSend=false;
+    socket.to(friendSocket).emit("llegaInvitacion", () => 
+      mustSend = true
+    );
+    if(mustSend){
+      console.log("must send")
+      transporter.sendMail({
+        from:'"hola" <ps09unizar@gmail.com>',
+        to:'theheroshadexd@gmail.com',
+        subject:'Tienes una nueva petición de amistad!',
+        html:`<b>Inicia sesión para aceptarla o rechazarla</b>
+            <a href="https://keen-thompson-0eaf88.netlify.app/">https://keen-thompson-0eaf88.netlify.app/</a>`
+      })
+    }
+    console.log(mustSend);
+    
+    
   })
   
   socket.on("aceptarInvitacionAmigo", (user) => {
