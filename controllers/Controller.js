@@ -2160,7 +2160,7 @@ exports.cogerToken=(req,res)=>{
 
 function handlePushTokens (device, title, body) {
   
-        console.log("handlePushTokens"+username+"---"+device);
+        console.log("handlePushTokens"+"---"+device);
 
     if (!Expo.isExpoPushToken(device)) {
       console.log(`Push token ${device} is not a valid Expo push token`);
