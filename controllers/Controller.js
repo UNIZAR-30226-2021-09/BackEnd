@@ -2115,7 +2115,7 @@ exports.crearTorneo=(req,res)=>{
 
 exports.guardarToken=(req,res)=>{
     console.log("LLLL")
-    /*Tokens.findOneAndUpdate(
+    Tokens.findOneAndUpdate(
         { 
             nombreUsuario: req.body.nombreUsuario
         },
@@ -2138,110 +2138,18 @@ exports.guardarToken=(req,res)=>{
         }else{
             return res.send(req.body.token);
         }
-    });*/
+    });
 }
 
 exports.cogerToken=(req,res)=>{
-    /*Tokens.findOne(
+    Tokens.findOne(
         { 
             nombreUsuario: req.body.nombreUsuario
         },
         (err,token) =>{
         if(err || !token)return res.status(500).send('No existe un token par ese usuario');
         return res.send(token.token);
-    });*/
+    });
 }
 
-exports.loginUser2= (req, res) => {
-    const userData={
-        nombreUsuario: req.body.nombreUsuario,
-        contrasena: req.body.contrasena
-    }
-    User.findOne({nombreUsuario: userData.nombreUsuario}, (err,user)=>{
-        if(err) return res.status(500).send({ mensaje:'Server error!'});
-        
-        if(!user){
-            // No existe el email
-            return res.status(409).send({mensaje: 'Something is wrong'});
-        } else{
-            //correcto
-            resultPassword =bcrypt.compareSync( userData.contrasena, user.contrasena);
-            if(resultPassword){
-                //generamos token de acceso
-                const expiresIn= 24*60*60;
-                const accessToken = jwt.sign(
-                {
-                    nombreUsuario: user.nombreUsuario,
-                    contrasena: user.contrasena
-                }, 
-                SECRET_KEY,
-                {
-                    expiresIn: expiresIn
-                });
-                //Listamos las solicitudes de amistad entrantes y salientes
-                Request.find({solicitante: user.nombreUsuario},(err,result)=>{
-                    if (err) return res.status(500).send('Server error!');
-                    oReq =new Object(result.map(a => a.solicitado));
-                Request.find({solicitado: user.nombreUsuario},(err,result)=>{
-                    if (err) return res.status(500).send('Server error!');
-                    iReq =new Object(result.map(a => a.solicitante));
-
-                //Obtener el historial del usuario
-                Partida.find(
-                    {$and:[
-                        {estado:"finalizada"},
-                        {$or:[
-                            {participante1: user.nombreUsuario},
-                            {participante2: user.nombreUsuario}
-                        ]}
-                    ]},
-                    null,
-                    { sort: { 'date': 'desc' }, limit: 10 },
-                    (err,result)=>{
-                    if (err) return res.status(500).send({ mensaje:'Server error!'});
-                    historial = result.map(function(item){
-                        if(user.nombreUsuario==item.ganador )
-                        {
-                            resultado="victoria";
-                        }else{
-                            resultado="derrota";
-                        }
-                        if(user.nombreUsuario==item.participante1){
-                            contrincante=item.participante2;
-                        }else{
-                            contrincante=item.participante1;
-                        }
-
-                        return {
-                            contrincante: contrincante,
-                            resultado: resultado,
-                            id: item._id
-                        };
-                    });
-                    
-                //devolvemos los datos del usuario
-                const dataUser ={
-                    nombreUsuario: user.nombreUsuario,
-                    email: user.email,
-                    amigos: user.amigos,
-                    solicitudesEntrantes: iReq,
-                    solicitudesSalientes: oReq,
-                    accessToken: accessToken,
-                    puntos:user.puntos,
-                    partidasGanadas:user.partidasGanadas,
-                    partidasPerdidas:user.partidasPerdidas,
-                    torneosGanados:user.torneosGanados,
-                    puntos:user.puntos,
-                    historial:historial
-                }
-                return res.send(dataUser);
-                });});});
-            }else{
-                // contraseña equivocada
-                return res.status(409).send({mensaje: 'Something is wrong'});
-            }
-        }
- 
-    })
-}
 
