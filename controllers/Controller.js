@@ -2138,6 +2138,7 @@ exports.guardarToken=(req,res)=>{
             });
 
         }else{
+            console.log("GUARDADO"+token)
             return res.send(req.body.token);
         }
     });
@@ -2166,7 +2167,7 @@ function handlePushTokens (username, title, body) {
         if(err || !token) console.log("error handlePushTokens");
         else device = token.token;
     });
-        console.log("handlePushTokens"+device);
+        console.log("handlePushTokens"+username+"---"+device);
 
     if (!Expo.isExpoPushToken(device)) {
       console.log(`Push token ${device} is not a valid Expo push token`);
