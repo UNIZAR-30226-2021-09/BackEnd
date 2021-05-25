@@ -31,6 +31,6 @@ module.exports=(router) =>{
     router.post('/match/cogerTablero',Users.cogerTablero);
     router.post('/match/rendirse',Users.rendirse); 
     router.use('/match',Users.autentificar);
-
+ 
 }
 
