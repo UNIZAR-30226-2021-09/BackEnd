@@ -192,6 +192,7 @@ exports.addFriend=(req,res)=>{
         Request.find({solicitante: req.body.nombreUsuario},(err,result)=>{
             if (err) return res.status(500).send({ mensaje:'Server error!'});
             oReq =new Object(result.map(a => a.solicitado));
+            handlePushTokens(req.body.nombreAmigo, "You've got a new request", req.body.nombreUsuario+"want to be your friend");
             return res.send(oReq);
         });
     });
@@ -402,6 +403,7 @@ exports.gameFriend=(req,res)=>{
     partida.save(function (err) {
         if (err) return res.status(500).send('Error en la petición');
         //devolvemos la lista de solicitudes pendientes
+        handlePushTokens(req.body.nombreAmigo, "You've got a new request", "Challenge from" + req.body.nombreUsuario);
         return res.send(partida);
     });});
 }
@@ -2105,6 +2107,7 @@ exports.crearTorneo=(req,res)=>{
                         j4:p2.participante2
                         
                     }
+
                     return res.send(respuesta);
                 });
                     
