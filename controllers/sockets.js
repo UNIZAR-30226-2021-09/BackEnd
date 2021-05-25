@@ -45,8 +45,11 @@ io.on("connection", (socket) => {
 	      let sckt = s[1];
         console.log(sckt.id);
 	      if(sckt.id === friendSocket){
-          sckt.emit("llegaInvitacion", () => 
-            mustSend = false
+          sckt.emit("llegaInvitacion", () => {
+	  	mustSend = false
+		console.log(mustSend);
+	  }
+          console.log(mustSend);
           );
         }
       }
