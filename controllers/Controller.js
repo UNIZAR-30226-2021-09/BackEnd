@@ -1845,7 +1845,7 @@ exports.rendirse=(req,res)=>{
                                                 
                                                 //los otros dos contendientes no han terminado, creamos la partida
                                                 const final= new Partida ({
-                                                    participante1: req.body.nombreUsuario,
+                                                    participante1: partida.participante2,
                                                     ganador: undefined,
                                                     estado: "pendiente",
                                                     subestado: "colocandoBarcos",
@@ -1871,7 +1871,7 @@ exports.rendirse=(req,res)=>{
                                             else{
                                                 console.log("segundo en ganar")
                                                 console.log(result)
-                                                result[0].participante2 = req.body.nombreUsuario;
+                                                result[0].participante2 = partida.participante2;
                                                 result[0].estado = "enCurso";
                                                 result[0].save(function (err, final) {
                                                     if (err) return res.status(500).send('Error al actualiza final de torneo');
@@ -1979,7 +1979,7 @@ exports.rendirse=(req,res)=>{
                                                 
                                                 //los otros dos contendientes no han terminado, creamos la partida
                                                 const final= new Partida ({
-                                                    participante1: req.body.nombreUsuario,
+                                                    participante1: partida.participante2,
                                                     ganador: undefined,
                                                     estado: "pendiente",
                                                     subestado: "colocandoBarcos",
@@ -2005,7 +2005,7 @@ exports.rendirse=(req,res)=>{
                                             else{
                                                 console.log("segundo en ganar")
                                                 console.log(result)
-                                                result[0].participante2 = req.body.nombreUsuario;
+                                                result[0].participante2 = partida.participante2;
                                                 result[0].estado = "enCurso";
                                                 result[0].save(function (err, final) {
                                                     if (err) return res.status(500).send('Error al actualiza final de torneo');
