@@ -2145,7 +2145,7 @@ exports.guardarToken=(req,res)=>{
 }
 
 exports.cogerToken=(req,res)=>{
-    handlePushTokens(req.body.nombreUsuario, "mensaje", "de prueba");    
+    return handlePushTokens(req.body.nombreUsuario, "mensaje", "de prueba");    
 
     
     return "Ok";
@@ -2159,7 +2159,7 @@ function handlePushTokens (username, title, body) {
             nombreUsuario: username
         },
         (err,token) =>{
-        if(err || !token)return res.status(500).send('No existe un token par ese usuario');
+        if(err || !token)return console.log('No existe un token par ese usuario');
             var device = token.token;
             if (!Expo.isExpoPushToken(device)) {
               console.log(`Push token ${device} is not a valid Expo push token`);
@@ -2188,7 +2188,7 @@ function handlePushTokens (username, title, body) {
               }
             }
             })();
-        return res.send(token.token);
+        return token.token;
     });
     
 }
