@@ -41,9 +41,16 @@ io.on("connection", (socket) => {
     }
     else{
       mustSend=true;
-      io.sockets.connected[friendSocket].emit("llegaInvitacion", () => 
-        mustSend = false
-      );
+      for (let s of io.of('/').sockets) {
+	      let sckt = s[1];
+        console.log(sckt.userId);
+	      if(sckt.userId === friendSocket){
+          sckt.emit("llegaInvitacion", () => 
+            mustSend = false
+          );
+        }
+      }
+      
       if(mustSend){
         console.log("must send")
         transporter.sendMail({
