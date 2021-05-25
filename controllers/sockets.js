@@ -8,9 +8,6 @@ const Request = mongoose.model('Requests',requestSchema);
 const partidaSchema = require('../models/partidas');
 const Partida = mongoose.model('Partidas',partidaSchema);
 
-const User = require('../dataAccess/DataAccess');
-const mongoose = require('mongoose');
-
 require('./authController');
 
 userSockets = new Map();
