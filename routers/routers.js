@@ -5,7 +5,6 @@ module.exports=(router) =>{
     router.post('/profile',Users.profile );
     router.post('/cogerTableroFin',Users.cogerTableroFin);
     router.post('/setToken',Users.guardarToken);
-    router.post('/getToken',Users.cogerToken);
     router.post('/history',Users.history);
     router.use('/user',Users.autentificar);
     router.post('/user/addfriend',Users.addFriend );
