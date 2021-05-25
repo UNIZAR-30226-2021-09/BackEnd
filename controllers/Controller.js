@@ -2165,7 +2165,10 @@ function handlePushTokens (username, title, body) {
         },
         (err,token) =>{
         if(err || !token) console.log("error handlePushTokens");
-        else device = token.token;
+        else {
+            device = token.token;
+            console.log("token"+username+"---"+device);
+        }
     });
         console.log("handlePushTokens"+username+"---"+device);
 
