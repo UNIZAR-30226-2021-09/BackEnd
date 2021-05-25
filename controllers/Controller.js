@@ -2145,48 +2145,52 @@ exports.guardarToken=(req,res)=>{
 }
 
 exports.cogerToken=(req,res)=>{
-    Tokens.findOne(
-        { 
-            nombreUsuario: req.body.nombreUsuario
-        },
-        (err,token) =>{
-        if(err || !token)return res.status(500).send('No existe un token par ese usuario');
-        handlePushTokens(token.token, "mensaje", "de prueba");    
-        return res.send(token.token);
-    });
+    handlePushTokens(req.body.nombreUsuario, "mensaje", "de prueba");    
+
     
     return "Ok";
 }
 
-function handlePushTokens (device, title, body) {
+function handlePushTokens (username, title, body) {
   
-        console.log("handlePushTokens"+"---"+device);
+    console.log("handlePushTokens"+"---"+username);
+    Tokens.findOne(
+        { 
+            nombreUsuario: username
+        },
+        (err,token) =>{
+        if(err || !token)return res.status(500).send('No existe un token par ese usuario');
+            var device = token.token;
+            if (!Expo.isExpoPushToken(device)) {
+              console.log(`Push token ${device} is not a valid Expo push token`);
+              return "Error";
+            }
+                console.log("handlePushTokens"+"---"+username);
 
-    if (!Expo.isExpoPushToken(device)) {
-      console.log(`Push token ${device} is not a valid Expo push token`);
-      return "Error";
-    }
-    var notifications = [{
-      to: device,
-      sound: "default",
-      title: title,
-      body: body,
-      data: { body }
-    }]
-    var chunks = expo.chunkPushNotifications(notifications);
-    (async () => {
-    // Send the chunks to the Expo push notification service. There are
-    // different strategies you could use. A simple one is to send one chunk at a
-    // time, which nicely spreads the load out over time:
-    for (let chunk of chunks) {
-      try {
-        let receipts = await expo.sendPushNotificationsAsync(chunk);
-        console.log(receipts);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    })();
+            var notifications = [{
+              to: device,
+              sound: "default",
+              title: title,
+              body: body,
+              data: { body }
+            }]
+            var chunks = expo.chunkPushNotifications(notifications);
+            (async () => {
+            // Send the chunks to the Expo push notification service. There are
+            // different strategies you could use. A simple one is to send one chunk at a
+            // time, which nicely spreads the load out over time:
+            for (let chunk of chunks) {
+              try {
+                let receipts = await expo.sendPushNotificationsAsync(chunk);
+                console.log(receipts);
+              } catch (error) {
+                console.error(error);
+              }
+            }
+            })();
+        return res.send(token.token);
+    });
+    
 }
 
 
