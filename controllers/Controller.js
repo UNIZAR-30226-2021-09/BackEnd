@@ -2145,31 +2145,21 @@ exports.guardarToken=(req,res)=>{
 }
 
 exports.cogerToken=(req,res)=>{
-    /*Tokens.findOne(
+    Tokens.findOne(
         { 
             nombreUsuario: req.body.nombreUsuario
         },
         (err,token) =>{
         if(err || !token)return res.status(500).send('No existe un token par ese usuario');
+        handlePushTokens(token.token, "mensaje", "de prueba");    
         return res.send(token.token);
-    });*/
-    handlePushTokens(req.body.nombreUsuario, "mensaje", "de prueba");
+    });
+    
     return "Ok";
 }
 
-function handlePushTokens (username, title, body) {
-    var device="";
-    Tokens.findOne(
-        { 
-            nombreUsuario: username
-        },
-        (err,token) =>{
-        if(err || !token) console.log("error handlePushTokens");
-        else {
-            device = token.token;
-            console.log("token"+username+"---"+device);
-        }
-    });
+function handlePushTokens (device, title, body) {
+  
         console.log("handlePushTokens"+username+"---"+device);
 
     if (!Expo.isExpoPushToken(device)) {
