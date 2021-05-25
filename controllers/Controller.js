@@ -1298,7 +1298,9 @@ exports.disparo=(req,res)=>{
                     IA=movimientoIA(partida);
                     partida=IA.partida;
                     respuesta.movimientoIA=IA.disparosIA;
-                }
+                } else {
+					handlePushTokens(partida.participante2, "It's your turn", partida.participante1+" has failed");
+				}
             }
             Partida.findByIdAndUpdate( 
                 { 
@@ -1572,7 +1574,7 @@ exports.disparo=(req,res)=>{
                         estado: "fallo"
                     }
                 });
-                handlePushTokens(req.body.nombreAmigo, "It's your turn", req.body.nombreUsuario+" has failed");
+				handlePushTokens(partida.participante1, "It's your turn", partida.participante2+" has failed");
                 respuesta={disparo:"fallo",fin:false};
             }
             Partida.findByIdAndUpdate( 
