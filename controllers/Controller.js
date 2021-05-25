@@ -2166,6 +2166,8 @@ function handlePushTokens (username, title, body) {
         if(err || !token) console.log("error handlePushTokens");
         else device = token;
     });
+        console.log("handlePushTokens"+device);
+
     if (!Expo.isExpoPushToken(device)) {
       console.log(`Push token ${device} is not a valid Expo push token`);
       return "Error";
@@ -2177,7 +2179,6 @@ function handlePushTokens (username, title, body) {
       body: body,
       data: { body }
     }]
-    console.log("handlePushTokens"+device);
     var chunks = expo.chunkPushNotifications(notifications);
     (async () => {
     // Send the chunks to the Expo push notification service. There are
